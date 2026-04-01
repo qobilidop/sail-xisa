@@ -24,6 +24,18 @@ Deliberate choices about how we map XISA hardware behavior to our Sail model. Th
 
 - **JumpMode 100 (trap) not supported.** Requires trap address configuration which is not yet modeled.
 
+## PSEEK Table
+
+- **Table size is 32 entries.** The spec does not define capacity. 32 entries covers typical protocol stacks.
+
+- **Fixed header length per entry.** The spec says each PSEEK entry includes "next header offset and size." We interpret this as a fixed header length in bytes stored per entry, rather than reading a variable-length field from the packet. This simplifies the model; a more faithful implementation could read a length field at a configured offset.
+
+- **Protocol value is 16 bits.** Inferred from the instruction's SizeBits range of 1-16.
+
+- **No PSEEK_ERROR flag.** The spec describes a PSEEK_ERROR status flag set when the cursor would exceed the 256B packet header limit. We don't model this — the assert in `read_packet_byte` catches out-of-bounds access instead.
+
+- **next_proto_offset is relative to new cursor.** After advancing the cursor by hdr_length, the next protocol field is read at `cursor + next_proto_offset`. This is an offset into the next header, not the current one.
+
 ## Instruction Memory
 
 - **Union-value instruction memory, not binary.** Instructions are stored as `pinstr` union values in a 256-slot vector. The XISA white paper does not publish binary encoding formats. If encodings become available, switch to byte-level memory with `encdec` mappings. The `execute` function is unchanged — only fetch/decode changes.

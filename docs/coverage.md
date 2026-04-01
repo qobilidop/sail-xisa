@@ -14,8 +14,8 @@ Tracks which XISA instructions are formally specified in Sail. Section numbers r
 | 6 | EXT | 3.12.3 | Done | .CD supported. No .PR, .SCSM, .ECSM yet. |
 | 7 | EXTNXTP | 3.12.3 | Done | .CD supported. No .PR, .SCSM, .ECSM yet |
 | 8 | NXTP | 3.12.1 | Done | |
-| 9 | PSEEK | 3.12.2 | Not started | Requires PSEEK table model |
-| 10 | PSEEKNXTP | 3.12.2 | Not started | |
+| 9 | PSEEK | 3.12.2 | Done | No PSEEK_ERROR/trap, no .CD. Fixed hdr length per entry |
+| 10 | PSEEKNXTP | 3.12.2 | Done | No .CD |
 | 11 | EXTMAP | 3.12.4 | Done | No .PR, .SCSM, .ECSM yet |
 | 12 | MOVMAP | 3.12.5 | Done | No .HDR modifier yet |
 | 13 | CNCTBY | 3.12.6 | Done | |
