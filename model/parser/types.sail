@@ -148,4 +148,12 @@ union clause pinstr = PST : (pregidx, bits8, bits8, bits8, bool)
 // Fields: (immediate_value, struct_offset_bits, size_bits)
 union clause pinstr = PSTI : (bits16, bits8, bits8)
 
+// EXTMAP: Extract data from packet into a MAP register.
+// Fields: (map_reg_idx, dest_offset_bits, packet_offset_bits, size_bits)
+union clause pinstr = PEXTMAP : (bits4, bits8, bits16, bits8)
+
+// MOVMAP: Move data from a parser register into a MAP register.
+// Fields: (map_reg_idx, dest_offset_bits, src_reg, src_offset_bits, size_bits)
+union clause pinstr = PMOVMAP : (bits4, bits8, pregidx, bits8, bits8)
+
 end pinstr
