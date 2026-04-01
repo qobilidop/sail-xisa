@@ -1,3 +1,4 @@
+
 // Parser general-purpose registers: 4 x 128-bit, big-endian.
 register PR : vector(4, bits128)
 
@@ -15,19 +16,25 @@ register parser_halted : bool
 register parser_drop : bool
 
 // Condition flags (set by arithmetic/compare instructions).
-register pflag_z : bool  // Zero flag
-register pflag_n : bool  // Negative flag
-
+register pflag_z :
+    bool // Zero flag
+register pflag_n :
+    bool // Negative flag
 // Read a parser register. PRN always reads as zero.
 val read_preg : pregidx -> bits128
 function read_preg(r) =
-    if is_null_reg(r) then sail_zeros(128)
-    else PR[pregidx_to_nat(r)]
+    if is_null_reg(r) then {
+        sail_zeros(128)
+    } else {
+        PR[pregidx_to_nat(r)]
+    }
 
 // Write a parser register. Writes to PRN are discarded.
 val write_preg : (pregidx, bits128) -> unit
 function write_preg(r, v) =
-    if not_bool(is_null_reg(r)) then PR[pregidx_to_nat(r)] = v
+    if not_bool(is_null_reg(r)) then {
+        PR[pregidx_to_nat(r)] = v
+    }
 
 // Initialize parser state (called before running a parser program).
 val parser_init : unit -> unit
@@ -40,7 +47,7 @@ function parser_init() = {
     parser_halted = false;
     parser_drop = false;
     pflag_z = false;
-    pflag_n = false;
+    pflag_n = false
 }
 
 // Read a byte from the packet header buffer.

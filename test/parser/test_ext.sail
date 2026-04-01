@@ -15,8 +15,7 @@ function test_ext_basic() = {
     let _ = execute(PEXT(PR0, 0x00, 0x0000, 0x10, false));
 
     // Bytes 0x01, 0x02 extracted big-endian: 0x0102 placed at R0[15:0]
-    assert(PR[0] == 0x00000000_00000000_00000000_00000102,
-           "EXT should extract 2 bytes from packet into register");
+    assert(PR[0] == 0x00000000_00000000_00000000_00000102, "EXT should extract 2 bytes from packet into register")
 }
 
 val test_ext_with_cursor_offset : unit -> unit
@@ -32,8 +31,7 @@ function test_ext_with_cursor_offset() = {
     pcursor = 0x02;
     let _ = execute(PEXT(PR0, 0x00, 0x0000, 0x08, false));
 
-    assert(PR[0] == 0x00000000_00000000_00000000_000000CC,
-           "EXT should extract relative to cursor position");
+    assert(PR[0] == 0x00000000_00000000_00000000_000000CC, "EXT should extract relative to cursor position")
 }
 
 val test_ext_with_source_offset : unit -> unit
@@ -49,8 +47,7 @@ function test_ext_with_source_offset() = {
     pcursor = 0x00;
     let _ = execute(PEXT(PR0, 0x00, 0x0010, 0x08, false));
 
-    assert(PR[0] == 0x00000000_00000000_00000000_000000CC,
-           "EXT should respect source offset from cursor");
+    assert(PR[0] == 0x00000000_00000000_00000000_000000CC, "EXT should respect source offset from cursor")
 }
 
 val test_ext_with_dest_offset : unit -> unit
@@ -64,8 +61,7 @@ function test_ext_with_dest_offset() = {
     let _ = execute(PEXT(PR0, 0x70, 0x0000, 0x08, false));
 
     // R0[119:112] = 0xFF
-    assert(PR[0] == 0x00FF0000_00000000_00000000_00000000,
-           "EXT should place data at correct destination offset");
+    assert(PR[0] == 0x00FF0000_00000000_00000000_00000000, "EXT should place data at correct destination offset")
 }
 
 val test_ext_with_clear_dest : unit -> unit
@@ -79,8 +75,7 @@ function test_ext_with_clear_dest() = {
     pcursor = 0x00;
     let _ = execute(PEXT(PR0, 0x00, 0x0000, 0x08, true));
 
-    assert(PR[0] == 0x00000000_00000000_00000000_000000AB,
-           "EXT.CD should clear register then place extracted data");
+    assert(PR[0] == 0x00000000_00000000_00000000_000000AB, "EXT.CD should clear register then place extracted data")
 }
 
 val test_ext_preserves_other_bits_without_cd : unit -> unit
@@ -94,8 +89,7 @@ function test_ext_preserves_other_bits_without_cd() = {
     pcursor = 0x00;
     let _ = execute(PEXT(PR0, 0x00, 0x0000, 0x08, false));
 
-    assert(PR[0] == 0xFFFFFFFF_FFFFFFFF_FFFFFFFF_FFFFFFAB,
-           "EXT without .CD should preserve other bits");
+    assert(PR[0] == 0xFFFFFFFF_FFFFFFFF_FFFFFFFF_FFFFFFAB, "EXT without .CD should preserve other bits")
 }
 
 val main : unit -> unit
@@ -105,5 +99,5 @@ function main() = {
     test_ext_with_source_offset();
     test_ext_with_dest_offset();
     test_ext_with_clear_dest();
-    test_ext_preserves_other_bits_without_cd();
+    test_ext_preserves_other_bits_without_cd()
 }

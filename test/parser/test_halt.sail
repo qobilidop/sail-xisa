@@ -9,7 +9,7 @@ function test_halt_sets_halted_flag() = {
 
     assert(result == RETIRE_HALT, "HALT should return RETIRE_HALT");
     assert(parser_halted == true, "HALT should set parser_halted flag");
-    assert(parser_drop == false, "HALT should not set drop flag");
+    assert(parser_drop == false, "HALT should not set drop flag")
 }
 
 val test_haltdrop_sets_both_flags : unit -> unit
@@ -20,7 +20,7 @@ function test_haltdrop_sets_both_flags() = {
 
     assert(result == RETIRE_DROP, "HALTDROP should return RETIRE_DROP");
     assert(parser_halted == true, "HALTDROP should set parser_halted flag");
-    assert(parser_drop == true, "HALTDROP should set drop flag");
+    assert(parser_drop == true, "HALTDROP should set drop flag")
 }
 
 val test_halt_does_not_modify_registers : unit -> unit
@@ -30,8 +30,7 @@ function test_halt_does_not_modify_registers() = {
 
     let _ = execute(PHALT(false));
 
-    assert(PR[0] == 0xDEADBEEF_DEADBEEF_DEADBEEF_DEADBEEF,
-           "HALT should not modify registers");
+    assert(PR[0] == 0xDEADBEEF_DEADBEEF_DEADBEEF_DEADBEEF, "HALT should not modify registers")
 }
 
 val test_halt_does_not_modify_cursor : unit -> unit
@@ -41,7 +40,7 @@ function test_halt_does_not_modify_cursor() = {
 
     let _ = execute(PHALT(false));
 
-    assert(pcursor == 0x10, "HALT should not modify cursor");
+    assert(pcursor == 0x10, "HALT should not modify cursor")
 }
 
 val main : unit -> unit
@@ -49,5 +48,5 @@ function main() = {
     test_halt_sets_halted_flag();
     test_haltdrop_sets_both_flags();
     test_halt_does_not_modify_registers();
-    test_halt_does_not_modify_cursor();
+    test_halt_does_not_modify_cursor()
 }

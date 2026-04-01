@@ -1,4 +1,5 @@
 // Parser instruction execution.
+
 // Each instruction adds a clause to this scattered function.
 val execute : pinstr -> ExecutionResult
 
@@ -27,7 +28,7 @@ function clause execute(PMOV(rd, dest_offset, rs, src_offset, size_bits)) = {
     let dst_val = read_preg(rd);
     let doff : nat = unsigned(dest_offset);
     let soff : nat = unsigned(src_offset);
-    let sz   : nat = unsigned(size_bits);
+    let sz : nat = unsigned(size_bits);
     let extracted = extract_bits(src_val, soff, sz);
     let result = insert_bits(dst_val, doff, sz, extracted);
     write_preg(rd, result);
@@ -39,7 +40,7 @@ function clause execute(PMOV(rd, dest_offset, rs, src_offset, size_bits)) = {
 function clause execute(PMOVI(rd, dest_offset_bytes, immediate, size_bits)) = {
     let dst_val = read_preg(rd);
     let doff : nat = unsigned(dest_offset_bytes) * 8;
-    let sz   : nat = unsigned(size_bits);
+    let sz : nat = unsigned(size_bits);
     let imm_128 : bits128 = sail_zero_extend(immediate, 128);
     let result = insert_bits(dst_val, doff, sz, imm_128);
     write_preg(rd, result);
@@ -55,7 +56,7 @@ function clause execute(PMOVI(rd, dest_offset_bytes, immediate, size_bits)) = {
 function clause execute(PEXT(rd, dest_offset, src_offset_bits, size_bits, clear_dest)) = {
     let doff = unsigned(dest_offset);
     let soff = unsigned(src_offset_bits);
-    let sz   = unsigned(size_bits);
+    let sz = unsigned(size_bits);
     let cursor_bit_offset = unsigned(pcursor) * 8;
     let packet_bit_offset = cursor_bit_offset + soff;
 
@@ -74,9 +75,10 @@ function clause execute(PEXT(rd, dest_offset, src_offset_bits, size_bits, clear_
     while i < bytes_needed do {
         let byte_idx : int = start_byte + i;
         let byte_val : bits128 = sail_zero_extend(read_packet_byte(byte_idx), 128);
+
         // Place this byte: first byte is most significant
         acc = acc | sail_shiftleft(byte_val, 8 * (bytes_needed - 1 - i));
-        i = i + 1;
+        i = i + 1
     };
 
     // Shift right to align the extracted bits, then mask to sz bits.
@@ -84,7 +86,11 @@ function clause execute(PEXT(rd, dest_offset, src_offset_bits, size_bits, clear_
     let extracted : bits128 = sail_shiftright(acc, shift_amount) & sail_mask(128, sail_ones(sz));
 
     // Write to destination register
-    let dst_val : bits128 = if clear_dest then sail_zeros(128) else read_preg(rd);
+    let dst_val : bits128 = if clear_dest then {
+            sail_zeros(128)
+        } else {
+            read_preg(rd)
+        };
     let result = insert_bits(dst_val, doff, sz, extracted);
     write_preg(rd, result);
     RETIRE_SUCCESS

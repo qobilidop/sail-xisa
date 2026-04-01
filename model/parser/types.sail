@@ -1,7 +1,8 @@
 // Parser register indices.
 // The Parser has 4 general-purpose 128-bit registers (R0-R3).
+
 // RN is a null register used when the destination is not needed.
-enum pregidx = {PR0, PR1, PR2, PR3, PRN}
+enum pregidx = { PR0, PR1, PR2, PR3, PRN }
 
 // Convert parser register index to numeric index (0-3).
 // PRN maps to 0 but writes to PRN are discarded (see state.sail).
@@ -11,14 +12,14 @@ function pregidx_to_nat(r) = match r {
     PR1 => 1,
     PR2 => 2,
     PR3 => 3,
-    PRN => 0
+    PRN => 0,
 }
 
 // Is this the null register?
 val is_null_reg : pregidx -> bool
 function is_null_reg(r) = match r {
     PRN => true,
-    _   => false
+    _   => false,
 }
 
 // Parser instruction union (scattered -- each file adds clauses).

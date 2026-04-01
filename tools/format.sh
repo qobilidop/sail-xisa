@@ -20,22 +20,34 @@ if [ $# -eq 0 ]; then
     done
     echo "Done."
 elif [ "$1" = "--check" ]; then
-    # Check mode: format in place, then check for diffs
+    # Check mode: save copies, format, compare, restore if needed.
+    # Uses temp files instead of git so it works inside containers.
     echo "Checking Sail formatting..."
+    TMPDIR=$(mktemp -d)
+    trap 'rm -rf "$TMPDIR"' EXIT
+    UNFORMATTED=()
+
     for f in $SAIL_FILES; do
+        cp "$f" "$TMPDIR/$(basename "$f").bak"
         sail --fmt "$f"
+        if ! diff -q "$f" "$TMPDIR/$(basename "$f").bak" > /dev/null 2>&1; then
+            UNFORMATTED+=("$f")
+            # Restore original
+            cp "$TMPDIR/$(basename "$f").bak" "$f"
+        fi
     done
-    if git diff --quiet -- '*.sail'; then
+
+    if [ ${#UNFORMATTED[@]} -eq 0 ]; then
         echo "All Sail files are formatted."
         exit 0
     else
         echo ""
         echo "ERROR: The following Sail files are not formatted:"
-        git diff --name-only -- '*.sail'
+        for f in "${UNFORMATTED[@]}"; do
+            echo "  $f"
+        done
         echo ""
         echo "Run 'tools/format.sh' to fix."
-        # Restore original files so working tree is not modified
-        git checkout -- '*.sail'
         exit 1
     fi
 else
