@@ -387,6 +387,9 @@ function parser_init() = {
     // Reset transition table and NXTP result
     transition_table_init();
 
+    // Reset PSEEK table
+    pseek_table_init();
+
     // Reset MAP registers
     MAP = init_map();
 

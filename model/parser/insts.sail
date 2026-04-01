@@ -5,6 +5,32 @@ val execute : pinstr -> ExecutionResult
 
 scattered function execute
 
+// Extract a protocol field from the packet at an absolute byte offset with a given bit size.
+// Used by the PSEEK scan loop to read next-protocol fields from packet headers.
+val pseek_extract_proto : (int, nat) -> bits16
+function pseek_extract_proto(byte_offset, size_bits) = {
+    let bit_offset : int = byte_offset * 8;
+    let pbo_bv : bits(20) = get_slice_int(20, bit_offset, 0);
+    let start_byte = unsigned(sail_shiftright(pbo_bv, 3));
+    let bit_in_byte = unsigned(pbo_bv & 0x00007);
+
+    let sum_bv : bits(20) = get_slice_int(20, bit_in_byte + size_bits + 7, 0);
+    let bytes_needed = unsigned(sail_shiftright(sum_bv, 3));
+
+    var acc : bits128 = sail_zeros(128);
+    var i : int = 0;
+    while i < bytes_needed do {
+        let bidx : int = start_byte + i;
+        let bval : bits128 = sail_zero_extend(read_packet_byte(bidx), 128);
+        acc = acc | sail_shiftleft(bval, 8 * (bytes_needed - 1 - i));
+        i = i + 1
+    };
+
+    let shift_amount : int = bytes_needed * 8 - bit_in_byte - size_bits;
+    let extracted : bits128 = sail_shiftright(acc, shift_amount) & sail_mask(128, sail_ones(size_bits));
+    sail_mask(16, extracted)
+}
+
 // NOP: No operation. Does nothing, returns success.
 function clause execute(PNOP()) = RETIRE_SUCCESS
 
