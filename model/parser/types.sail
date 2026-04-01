@@ -206,4 +206,12 @@ union clause pinstr = PBRBTSTNXTP : (pbtcond, pregidx, bits8, bits8, bits16)
 // Fields: (condition, src_reg, bit_offset, transition_rule_number)
 union clause pinstr = PBRBTSTNS : (pbtcond, pregidx, bits8, bits8)
 
+// PSEEK: Scan over protocol headers to next protocol of interest.
+// Fields: (dest_reg, dest_offset_bits, src_reg, src_offset_bits, size_bits, class_id)
+union clause pinstr = PPSEEK : (pregidx, bits8, pregidx, bits8, bits8, bits8)
+
+// PSEEKNXTP: PSEEK + NXTP lookup with final protocol value.
+// Fields: (dest_reg, dest_offset_bits, src_reg, src_offset_bits, size_bits, class_id)
+union clause pinstr = PPSEEKNXTP : (pregidx, bits8, pregidx, bits8, bits8, bits8)
+
 end pinstr

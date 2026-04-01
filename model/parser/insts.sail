@@ -800,4 +800,84 @@ function clause execute(PBRBTSTNS(btcc, rs, bit_offset, rule_num)) = {
     RETIRE_SUCCESS
 }
 
+// PSEEK: Scan forward through packet headers, skipping protocols in the PSEEK table.
+// Advances cursor past each matched header. Stores final (unmatched) protocol in DestReg.
+function clause execute(PPSEEK(rd, dest_offset_bits, rs, src_offset_bits, size_bits, class_id)) = {
+    let src_val = read_preg(rs);
+    let soff : nat = unsigned(src_offset_bits);
+    let sz : nat = unsigned(size_bits);
+    let doff : nat = unsigned(dest_offset_bits);
+
+    // Extract initial protocol value from source register
+    let initial = extract_bits(src_val, soff, sz);
+    var proto : bits16 = sail_mask(16, initial);
+    var current_size : nat = sz;
+
+    // Scan loop: keep skipping while protocol matches a PSEEK entry
+    var scanning : bool = true;
+    while scanning do {
+        let entry_idx = pseek_lookup(class_id, proto);
+        if entry_idx < 0 then {
+            // No match — stop scanning
+            scanning = false
+        } else {
+            // Match: advance cursor by header length
+            let hdr_len : bits8 = read_pseek_hdr_length(entry_idx);
+            pcursor = pcursor + hdr_len;
+            // Extract next protocol from packet
+            let next_off : int = unsigned(pcursor) + unsigned(read_pseek_next_proto_off(entry_idx));
+            let next_sz : nat = unsigned(read_pseek_next_proto_size(entry_idx));
+            proto = pseek_extract_proto(next_off, next_sz);
+            current_size = next_sz
+        }
+    };
+
+    // Store final protocol value in DestReg at DestOffsetBits
+    let dst_val = read_preg(rd);
+    let proto_128 : bits128 = sail_zero_extend(proto, 128);
+    let result = insert_bits(dst_val, doff, current_size, proto_128);
+    write_preg(rd, result);
+    RETIRE_SUCCESS
+}
+
+// PSEEKNXTP: PSEEK scan + NXTP lookup with final protocol value.
+function clause execute(PPSEEKNXTP(rd, dest_offset_bits, rs, src_offset_bits, size_bits, class_id)) = {
+    let src_val = read_preg(rs);
+    let soff : nat = unsigned(src_offset_bits);
+    let sz : nat = unsigned(size_bits);
+    let doff : nat = unsigned(dest_offset_bits);
+
+    // Extract initial protocol value from source register
+    let initial = extract_bits(src_val, soff, sz);
+    var proto : bits16 = sail_mask(16, initial);
+    var current_size : nat = sz;
+
+    // Scan loop (same as PSEEK)
+    var scanning : bool = true;
+    while scanning do {
+        let entry_idx = pseek_lookup(class_id, proto);
+        if entry_idx < 0 then {
+            scanning = false
+        } else {
+            let hdr_len : bits8 = read_pseek_hdr_length(entry_idx);
+            pcursor = pcursor + hdr_len;
+            let next_off : int = unsigned(pcursor) + unsigned(read_pseek_next_proto_off(entry_idx));
+            let next_sz : nat = unsigned(read_pseek_next_proto_size(entry_idx));
+            proto = pseek_extract_proto(next_off, next_sz);
+            current_size = next_sz
+        }
+    };
+
+    // Store final protocol value in DestReg
+    let dst_val = read_preg(rd);
+    let proto_128 : bits128 = sail_zero_extend(proto, 128);
+    let result = insert_bits(dst_val, doff, current_size, proto_128);
+    write_preg(rd, result);
+
+    // NXTP lookup with final protocol
+    let key : bits24 = sail_zero_extend(proto, 24);
+    nxtp_matched = transition_lookup(parser_state, key);
+    RETIRE_SUCCESS
+}
+
 end execute
