@@ -118,4 +118,14 @@ union clause pinstr = PBR : (pcond, bits16)
 // Fields: (condition, src_reg, bit_offset, target_address)
 union clause pinstr = PBRBTST : (pbtcond, pregidx, bits8, bits16)
 
+// STC: Set cursor from register sub-field.
+// Cursor += ((SrcReg[offset+size-1:offset] + AdditionalIncr) << SrcShift)
+// Fields: (src_reg, src_offset_bits, src_size_bits, src_shift, additional_incr)
+union clause pinstr = PSTC : (pregidx, bits8, bits8, bits8, bits8)
+
+// STCI: Set cursor from immediate value.
+// Cursor += IncrValue
+// Fields: (incr_value)
+union clause pinstr = PSTCI : bits16
+
 end pinstr
