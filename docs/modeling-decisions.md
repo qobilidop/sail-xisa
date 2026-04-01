@@ -36,9 +36,13 @@ Deliberate choices about how we map XISA hardware behavior to our Sail model. Th
 
 - **next_proto_offset is relative to new cursor.** After advancing the cursor by hdr_length, the next protocol field is read at `cursor + next_proto_offset`. This is an offset into the next header, not the current one.
 
-## Instruction Memory
+## Instruction Memory and PC
 
-- **Union-value instruction memory, not binary.** Instructions are stored as `pinstr` union values in a 256-slot vector. The XISA white paper does not publish binary encoding formats. If encodings become available, switch to byte-level memory with `encdec` mappings. The `execute` function is unchanged — only fetch/decode changes.
+- **Parser PC is 16 bits.** The spec does not define the PC bit width or address field width for branch instructions. We chose 16 bits (65536 addressable slots), which is generous for parser programs. The PC width, branch address fields, and instruction memory size are all coupled to this choice.
+
+- **Instruction memory is 65536 entries.** Matches the PC addressable range. The spec does not define instruction memory capacity.
+
+- **64-bit binary instruction encoding.** The spec does not publish binary encoding formats. We define an implementation-specific encoding with a 6-bit opcode and fields packed MSB-first. This encoding is independent of instruction semantics — if the vendor publishes encodings, only the `encdec` mapping needs updating.
 
 ## Packet and Cursor
 
