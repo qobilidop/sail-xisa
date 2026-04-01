@@ -194,4 +194,16 @@ union clause pinstr = PBRNS : (pcond, bits8)
 // address_or_rule: used by mode 010 (as PC address) or 011 (as rule number)
 union clause pinstr = PBRNXTP : (pcond, bits8, bits16)
 
+// EXTNXTP: Extract from packet + NXTP lookup.
+// Fields: (dest_reg, source_offset_bits, size_bits, clear_dest)
+union clause pinstr = PEXTNXTP : (pregidx, bits16, bits8, bool)
+
+// BRBTSTNXTP: Bit test + branch to next protocol (NXTP result).
+// Fields: (condition, src_reg, bit_offset, jump_mode, address_or_rule)
+union clause pinstr = PBRBTSTNXTP : (pbtcond, pregidx, bits8, bits8, bits16)
+
+// BRBTSTNS: Bit test + branch to next state (transition rule).
+// Fields: (condition, src_reg, bit_offset, transition_rule_number)
+union clause pinstr = PBRBTSTNS : (pbtcond, pregidx, bits8, bits8)
+
 end pinstr
