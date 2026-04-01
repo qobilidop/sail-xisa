@@ -14,6 +14,16 @@ Deliberate choices about how we map XISA hardware behavior to our Sail model. Th
 
 - **MAP registers: full 128-bit access only.** The MAP spec (section 4.3) supports word-mode addressing (Ri.0 through Ri.3). From the parser's perspective (EXTMAP/MOVMAP), only full 128-bit register access is used. Word-mode addressing is a MAP ISA concern.
 
+## Transition Table
+
+- **Table size is 64 entries.** The spec defines the transition table interface (section 3.5) but not its capacity. 64 entries is sufficient for typical parser programs. This is an implementation-chosen parameter documented in `model/parser/params.sail`.
+
+- **State ID is 8 bits.** The spec does not define the bit width of parser state IDs. 8 bits (256 states) covers typical protocol graphs. Documented in `model/parser/params.sail`.
+
+- **NXTP lookup is synchronous.** See "Timing and Async Operations" above.
+
+- **JumpMode 100 (trap) not supported.** Requires trap address configuration which is not yet modeled.
+
 ## Instruction Memory
 
 - **Union-value instruction memory, not binary.** Instructions are stored as `pinstr` union values in a 256-slot vector. The XISA white paper does not publish binary encoding formats. If encodings become available, switch to byte-level memory with `encdec` mappings. The `execute` function is unchanged — only fetch/decode changes.

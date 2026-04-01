@@ -13,7 +13,7 @@ Tracks which XISA instructions are formally specified in Sail. Section numbers r
 | 5 | MOVI | 3.12.11 | Done | No .CD modifier yet |
 | 6 | EXT | 3.12.3 | Done | .CD supported. No .PR, .SCSM, .ECSM yet. |
 | 7 | EXTNXTP | 3.12.3 | Not started | |
-| 8 | NXTP | 3.12.1 | Not started | Requires transition table model |
+| 8 | NXTP | 3.12.1 | Done | |
 | 9 | PSEEK | 3.12.2 | Not started | Requires PSEEK table model |
 | 10 | PSEEKNXTP | 3.12.2 | Not started | |
 | 11 | EXTMAP | 3.12.4 | Done | No .PR, .SCSM, .ECSM yet |
@@ -33,7 +33,7 @@ Tracks which XISA instructions are formally specified in Sail. Section numbers r
 | 25 | AND/ANDI | 3.12.15 | Done | No .CD modifier |
 | 26 | OR/ORI | 3.12.16 | Done | No .CD modifier |
 | 27 | CMP/CMPIBY/CMPIBI | 3.12.17 | Done | |
-| 28 | BR/BRBTST | 3.12.18 | Done | BRNS, BRNXTP, BRBTSTNXTP deferred (need transition table) |
+| 28 | BR/BRBTST/BRNS/BRNXTP | 3.12.18 | Done | BRBTSTNXTP, BRBTSTNSNXTP deferred. JumpMode 100 (trap) deferred |
 
 ## MAP ISA (Section 4 of XISA spec)
 

@@ -12,7 +12,7 @@
 
 - **EXT uses 20-bit intermediate bitvectors**: The packet bit offset arithmetic in the EXT instruction uses `bits(20)` intermediates via `get_slice_int`. This is safe given the spec's parameter ranges (max offset ~2551 bits), but the constraint is not enforced by Sail's type system. If the spec's ranges change, this should be revisited.
 
-- **BR variants deferred**: BRNS (branch to next state), BRNXTP (branch to next protocol), and BRBTSTNXTP require the transition table model, which is not yet implemented. Only BR<cc> and BRBTST<cc> are modeled.
+- **BR compound variants deferred**: BRBTSTNXTP (bit-test + next protocol) and BRBTSTNSNXTP (bit-test + next state) require compound instruction support. BRNS and BRNXTP are now implemented.
 
 - **Instruction memory uses pinstr array, not binary encoding**: The fetch-decode-execute loop uses a `vector(256, pinstr)` for instruction memory. Instructions are stored as union values, not binary-encoded bytes. When XISA binary encodings become available, replace with byte-level memory and add `mapping clause encdec` for each instruction. The `execute` function is unchanged — only the fetch/decode path changes.
 
