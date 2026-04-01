@@ -394,4 +394,16 @@ function clause execute(PSTCI(incr_value)) = {
     RETIRE_SUCCESS
 }
 
+// STH: Set header present and offset fields.
+// Optionally halt (.H modifier) after setting the header.
+function clause execute(PSTH(present_id, offset_id, halt)) = {
+    set_hdr(present_id, offset_id);
+    if halt then {
+        parser_halted = true;
+        RETIRE_HALT
+    } else {
+        RETIRE_SUCCESS
+    }
+}
+
 end execute
