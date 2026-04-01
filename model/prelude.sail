@@ -7,6 +7,7 @@ $include <string.sail>
 type bits4   = bits(4)
 type bits8   = bits(8)
 type bits16  = bits(16)
+type bits24  = bits(24)
 type bits128 = bits(128)
 
 // Execution result for instructions

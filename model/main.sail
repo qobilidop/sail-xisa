@@ -1,5 +1,6 @@
 $include "prelude.sail"
 $include "map/state.sail"
+$include "parser/params.sail"
 $include "parser/types.sail"
 $include "parser/state.sail"
 $include "parser/decode.sail"
