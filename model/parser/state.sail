@@ -15,11 +15,26 @@ register parser_halted : bool
 // Parser drop flag (set by HALTDROP).
 register parser_drop : bool
 
+// Parser program counter.
+register ppc : bits16
+
 // Condition flags (set by arithmetic/compare instructions).
 register pflag_z :
     bool // Zero flag
 register pflag_n :
     bool // Negative flag
+// Evaluate a branch condition code against the current flags.
+val eval_pcond : pcond -> bool
+function eval_pcond(cc) = match cc {
+    PCC_EQ  => pflag_z,
+    PCC_NEQ => not_bool(pflag_z),
+    PCC_LT  => pflag_n,
+    PCC_GT  => not_bool(pflag_n) & not_bool(pflag_z),
+    PCC_GE  => not_bool(pflag_n),
+    PCC_LE  => pflag_n | pflag_z,
+    PCC_AL  => true,
+}
+
 // Read a parser register. PRN always reads as zero.
 val read_preg : pregidx -> bits128
 function read_preg(r) =
@@ -44,6 +59,7 @@ function parser_init() = {
     PR[2] = sail_zeros(128);
     PR[3] = sail_zeros(128);
     pcursor = sail_zeros(8);
+    ppc = sail_zeros(16);
     parser_halted = false;
     parser_drop = false;
     pflag_z = false;

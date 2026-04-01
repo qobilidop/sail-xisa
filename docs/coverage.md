@@ -33,7 +33,7 @@ Tracks which XISA instructions are formally specified in Sail.
 | 25 | AND/ANDI | 3.12.15 | Done | No .CD modifier |
 | 26 | OR/ORI | 3.12.16 | Done | No .CD modifier |
 | 27 | CMP/CMPIBY/CMPIBI | 3.12.17 | Done | |
-| 28 | BR variants | 3.12.18 | Not started | 6 sub-variants |
+| 28 | BR/BRBTST | 3.12.18 | Done | BRNS, BRNXTP, BRBTSTNXTP deferred (need transition table) |
 
 ## MAP ISA (Section 4 of XISA spec)
 

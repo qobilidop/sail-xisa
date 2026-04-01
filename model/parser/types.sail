@@ -1,3 +1,10 @@
+
+// Branch condition codes for BR instructions.
+enum pcond = { PCC_EQ, PCC_NEQ, PCC_LT, PCC_GT, PCC_GE, PCC_LE, PCC_AL }
+
+// Bit-test condition codes for BRBTST instructions.
+enum pbtcond = { PBT_CLR, PBT_SET }
+
 // Parser register indices.
 // The Parser has 4 general-purpose 128-bit registers (R0-R3).
 
@@ -102,5 +109,13 @@ union clause pinstr = PCNCTBY : (pregidx, bits8, pregidx, bits8, bits8, pregidx,
 // Fields: (dest_reg, dest_offset_bits, src1_reg, src1_offset_bits, src1_size_bits,
 //          src2_reg, src2_offset_bits, src2_size_bits)
 union clause pinstr = PCNCTBI : (pregidx, bits8, pregidx, bits8, bits8, pregidx, bits8, bits8)
+
+// BR: Branch to address if condition is met.
+// Fields: (condition, target_address)
+union clause pinstr = PBR : (pcond, bits16)
+
+// BRBTST: Test bit in register and branch if condition is met.
+// Fields: (condition, src_reg, bit_offset, target_address)
+union clause pinstr = PBRBTST : (pbtcond, pregidx, bits8, bits16)
 
 end pinstr

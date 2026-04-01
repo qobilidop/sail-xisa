@@ -344,4 +344,30 @@ function clause execute(PCNCTBI(
     RETIRE_SUCCESS
 }
 
+// BR: Branch to target address if condition is met.
+// Updates ppc when the branch is taken.
+function clause execute(PBR(cc, target)) = {
+    if eval_pcond(cc) then {
+        ppc = target
+    };
+    RETIRE_SUCCESS
+}
+
+// BRBTST: Test a single bit in a register and branch if condition is met.
+// PBT_CLR branches if the bit is 0, PBT_SET branches if the bit is 1.
+function clause execute(PBRBTST(btcc, rs, bit_offset, target)) = {
+    let src_val = read_preg(rs);
+    let boff : nat = unsigned(bit_offset);
+    let bit_val = extract_bits(src_val, boff, 1);
+    let bit_is_set = bit_val != sail_zeros(128);
+    let take_branch : bool = match btcc {
+        PBT_CLR => not_bool(bit_is_set),
+        PBT_SET => bit_is_set,
+    };
+    if take_branch then {
+        ppc = target
+    };
+    RETIRE_SUCCESS
+}
+
 end execute
