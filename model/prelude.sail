@@ -4,6 +4,7 @@ $include <prelude.sail>
 $include <string.sail>
 
 // Bitvector type aliases
+type bits4   = bits(4)
 type bits8   = bits(8)
 type bits16  = bits(16)
 type bits128 = bits(128)

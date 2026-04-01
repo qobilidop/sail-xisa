@@ -457,4 +457,61 @@ function clause execute(PSTI(immediate, struct_offset_bits, size_bits)) = {
     RETIRE_SUCCESS
 }
 
+// EXTMAP: MAPReg[dest_off + size - 1 : dest_off] = Packet[cursor*8 + pkt_off + size - 1 : cursor*8 + pkt_off]
+// Same extraction logic as EXT, but writes to a MAP register.
+function clause execute(PEXTMAP(map_idx, dest_offset, pkt_offset_bits, size_bits)) = {
+    let midx : int = unsigned(map_idx);
+    let doff = unsigned(dest_offset);
+    let soff = unsigned(pkt_offset_bits);
+    let sz = unsigned(size_bits);
+    let cursor_bit_offset = unsigned(pcursor) * 8;
+    let packet_bit_offset = cursor_bit_offset + soff;
+
+    // Compute byte index and bit-within-byte (same as EXT).
+    let pbo_bv : bits(20) = get_slice_int(20, packet_bit_offset, 0);
+    let start_byte = unsigned(sail_shiftright(pbo_bv, 3));
+    let bit_in_byte = unsigned(pbo_bv & 0x00007);
+
+    // bytes_needed = ceil((bit_in_byte + sz) / 8)
+    let sum_bv : bits(20) = get_slice_int(20, bit_in_byte + sz + 7, 0);
+    let bytes_needed = unsigned(sail_shiftright(sum_bv, 3));
+
+    // Accumulate bytes into a 128-bit value (big-endian).
+    var acc : bits128 = sail_zeros(128);
+    var i : int = 0;
+    while i < bytes_needed do {
+        let byte_idx : int = start_byte + i;
+        let byte_val : bits128 = sail_zero_extend(read_packet_byte(byte_idx), 128);
+        acc = acc | sail_shiftleft(byte_val, 8 * (bytes_needed - 1 - i));
+        i = i + 1
+    };
+
+    // Shift right to align the extracted bits, then mask to sz bits.
+    let shift_amount : int = bytes_needed * 8 - bit_in_byte - sz;
+    let extracted : bits128 = sail_shiftright(acc, shift_amount) & sail_mask(128, sail_ones(sz));
+
+    // Write to MAP register
+    let dst_val = read_mapreg(midx);
+    let result = insert_bits(dst_val, doff, sz, extracted);
+    write_mapreg(midx, result);
+    RETIRE_SUCCESS
+}
+
+// MOVMAP: MAPReg[dest_off + size - 1 : dest_off] = SrcReg[src_off + size - 1 : src_off]
+// Copies a bit-field from a parser register into a MAP register.
+function clause execute(PMOVMAP(map_idx, dest_offset, rs, src_offset, size_bits)) = {
+    let midx : int = unsigned(map_idx);
+    let doff : nat = unsigned(dest_offset);
+    let soff : nat = unsigned(src_offset);
+    let sz : nat = unsigned(size_bits);
+
+    let src_val = read_preg(rs);
+    let extracted = extract_bits(src_val, soff, sz);
+
+    let dst_val = read_mapreg(midx);
+    let result = insert_bits(dst_val, doff, sz, extracted);
+    write_mapreg(midx, result);
+    RETIRE_SUCCESS
+}
+
 end execute
