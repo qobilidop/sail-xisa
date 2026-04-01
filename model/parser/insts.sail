@@ -514,4 +514,112 @@ function clause execute(PMOVMAP(map_idx, dest_offset, rs, src_offset, size_bits)
     RETIRE_SUCCESS
 }
 
+// MOVL: DestReg[m:k] = SrcReg1[i1:j1]
+// k = SrcReg2[i2:j2] + OffsBits1 (dynamic offset, shift left)
+// m = k + SizeBits1 - 1
+function clause execute(PMOVL(rd, rs1, offs1, size1, rs2, offs2, size2, clear_dest)) = {
+    let s1_val = read_preg(rs1);
+    let s2_val = read_preg(rs2);
+    let o1 : nat = unsigned(offs1);
+    let sz1 : nat = unsigned(size1);
+    let o2 : nat = unsigned(offs2);
+    let sz2 : nat = unsigned(size2);
+    let dynamic_offset : nat = unsigned(extract_bits(s2_val, o2, sz2));
+    let k : nat = dynamic_offset + o1;
+    let extracted = extract_bits(s1_val, o1, sz1);
+    let dst_val : bits128 = if clear_dest then sail_zeros(128) else read_preg(rd);
+    let result = insert_bits(dst_val, k, sz1, extracted);
+    write_preg(rd, result);
+    RETIRE_SUCCESS
+}
+
+// MOVLI: DestReg[m:k] = SrcReg[i:j]
+// k = ImmValue + OffsBits (immediate offset, shift left)
+// m = k + SizeBits - 1
+function clause execute(PMOVLI(rd, rs, offs, size_bits, imm_value, clear_dest)) = {
+    let src_val = read_preg(rs);
+    let o : nat = unsigned(offs);
+    let sz : nat = unsigned(size_bits);
+    let imm : nat = unsigned(imm_value);
+    let k : nat = imm + o;
+    let extracted = extract_bits(src_val, o, sz);
+    let dst_val : bits128 = if clear_dest then sail_zeros(128) else read_preg(rd);
+    let result = insert_bits(dst_val, k, sz, extracted);
+    write_preg(rd, result);
+    RETIRE_SUCCESS
+}
+
+// MOVLII: DestReg[m-1:k] = ImmValue[n-1:0]
+// k = SrcReg[i:j] (register sub-field is the dest offset)
+// m = k + ImmValueSize
+function clause execute(PMOVLII(rd, rs, offs, size_bits, imm_value, imm_value_size, clear_dest)) = {
+    let src_val = read_preg(rs);
+    let o : nat = unsigned(offs);
+    let sz : nat = unsigned(size_bits);
+    let imm_sz : nat = unsigned(imm_value_size);
+    let k : nat = unsigned(extract_bits(src_val, o, sz));
+    let imm_128 : bits128 = sail_zero_extend(sail_mask(128, imm_value), 128);
+    let dst_val : bits128 = if clear_dest then sail_zeros(128) else read_preg(rd);
+    let result = insert_bits(dst_val, k, imm_sz, imm_128);
+    write_preg(rd, result);
+    RETIRE_SUCCESS
+}
+
+// MOVR: DestReg[m:k] = SrcReg1[i1:j1]
+// k = OffsBits1 - SrcReg2[i2:j2] (dynamic offset, shift right)
+// m = k + SizeBits1 - 1
+function clause execute(PMOVR(rd, rs1, offs1, size1, rs2, offs2, size2, clear_dest)) = {
+    let s1_val = read_preg(rs1);
+    let s2_val = read_preg(rs2);
+    let o1 : nat = unsigned(offs1);
+    let sz1 : nat = unsigned(size1);
+    let o2 : nat = unsigned(offs2);
+    let sz2 : nat = unsigned(size2);
+    let dynamic_offset : nat = unsigned(extract_bits(s2_val, o2, sz2));
+    let k : int = o1 - dynamic_offset;
+    let k_clamped : nat = if k < 0 then 0 else k;
+    let extracted = extract_bits(s1_val, o1, sz1);
+    let dst_val : bits128 = if clear_dest then sail_zeros(128) else read_preg(rd);
+    let result = insert_bits(dst_val, k_clamped, sz1, extracted);
+    write_preg(rd, result);
+    RETIRE_SUCCESS
+}
+
+// MOVRI: DestReg[m:k] = SrcReg[i:j]
+// k = OffsBits - ImmValue (immediate offset, shift right)
+// m = k + SizeBits - 1
+function clause execute(PMOVRI(rd, rs, offs, size_bits, imm_value, clear_dest)) = {
+    let src_val = read_preg(rs);
+    let o : nat = unsigned(offs);
+    let sz : nat = unsigned(size_bits);
+    let imm : nat = unsigned(imm_value);
+    let k : int = o - imm;
+    let k_clamped : nat = if k < 0 then 0 else k;
+    let extracted = extract_bits(src_val, o, sz);
+    let dst_val : bits128 = if clear_dest then sail_zeros(128) else read_preg(rd);
+    let result = insert_bits(dst_val, k_clamped, sz, extracted);
+    write_preg(rd, result);
+    RETIRE_SUCCESS
+}
+
+// MOVRII: DestReg[m-1:0] = ImmValue[n-1:k]
+// k = SrcReg[i:j] (register sub-field)
+// m = ImmValueSize - SrcReg[i:j]
+function clause execute(PMOVRII(rd, rs, offs, size_bits, imm_value, imm_value_size, clear_dest)) = {
+    let src_val = read_preg(rs);
+    let o : nat = unsigned(offs);
+    let sz : nat = unsigned(size_bits);
+    let imm_sz : nat = unsigned(imm_value_size);
+    let reg_offset : nat = unsigned(extract_bits(src_val, o, sz));
+    let data_size : int = imm_sz - reg_offset;
+    let data_size_nat : nat = if data_size < 0 then 0 else data_size;
+    // Extract from ImmValue starting at bit reg_offset, for data_size_nat bits
+    let imm_128 : bits128 = sail_zero_extend(sail_mask(128, imm_value), 128);
+    let extracted = extract_bits(imm_128, reg_offset, data_size_nat);
+    let dst_val : bits128 = if clear_dest then sail_zeros(128) else read_preg(rd);
+    let result = insert_bits(dst_val, 0, data_size_nat, extracted);
+    write_preg(rd, result);
+    RETIRE_SUCCESS
+}
+
 end execute
