@@ -25,8 +25,8 @@ Tracks which XISA instructions are formally specified in Sail. Section numbers r
 | 17 | STCI | 3.12.8 | Done | No JumpMode, .SCSM, .ECSM yet |
 | 18 | STCH | 3.12.9 | Done | .H supported. No JumpMode, .SCSM, .ECSM yet |
 | 19 | STHC | 3.12.9 | Done | No JumpMode, .SCSM, .ECSM yet |
-| 20 | ST | 3.12.10 | Not started | Requires Struct model |
-| 21 | STI | 3.12.10 | Not started | |
+| 20 | ST | 3.12.10 | Done | .H supported. HW bits 6-31 restriction not enforced |
+| 21 | STI | 3.12.10 | Done | |
 | 22 | MOVL/MOVR variants | 3.12.12 | Not started | 6 sub-variants |
 | 23 | ADD/ADDI | 3.12.13 | Done | No .CD modifier |
 | 24 | SUB/SUBI/SUBII | 3.12.14 | Done | No .CD modifier |
