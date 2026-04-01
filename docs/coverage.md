@@ -16,8 +16,8 @@ Tracks which XISA instructions are formally specified in Sail. Section numbers r
 | 8 | NXTP | 3.12.1 | Not started | Requires transition table model |
 | 9 | PSEEK | 3.12.2 | Not started | Requires PSEEK table model |
 | 10 | PSEEKNXTP | 3.12.2 | Not started | |
-| 11 | EXTMAP | 3.12.4 | Not started | Requires MAP register model |
-| 12 | MOVMAP | 3.12.5 | Not started | Requires MAP register model |
+| 11 | EXTMAP | 3.12.4 | Done | No .PR, .SCSM, .ECSM yet |
+| 12 | MOVMAP | 3.12.5 | Done | No .HDR modifier yet |
 | 13 | CNCTBY | 3.12.6 | Done | |
 | 14 | CNCTBI | 3.12.6 | Done | |
 | 15 | STH | 3.12.7 | Done | .H supported. No JumpMode, .SCSM, .ECSM yet |
