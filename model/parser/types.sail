@@ -180,4 +180,18 @@ union clause pinstr = PMOVRI : (pregidx, pregidx, bits8, bits8, bits8, bool)
 // Fields: (dest_reg, src_reg, offs, size, imm_value, imm_value_size, clear_dest)
 union clause pinstr = PMOVRII : (pregidx, pregidx, bits8, bits8, bits8, bits8, bool)
 
+// NXTP: Calculate next-protocol entry address via transition table lookup.
+// Fields: (src_reg, src_offset_bits, size_bits)
+union clause pinstr = PNXTP : (pregidx, bits8, bits8)
+
+// BRNS: Branch to next state indicated by a transition rule number.
+// Fields: (condition, transition_rule_number)
+union clause pinstr = PBRNS : (pcond, bits8)
+
+// BRNXTP: Branch to next-protocol (NXTP result), with JumpMode for no-match.
+// Fields: (condition, jump_mode, address_or_rule)
+// jump_mode: 000=nop, 001=continue, 010=jump to address, 011=use rule
+// address_or_rule: used by mode 010 (as PC address) or 011 (as rule number)
+union clause pinstr = PBRNXTP : (pcond, bits8, bits16)
+
 end pinstr
