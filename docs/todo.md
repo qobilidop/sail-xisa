@@ -14,7 +14,9 @@
 
 - **BR variants deferred**: BRNS (branch to next state), BRNXTP (branch to next protocol), and BRBTSTNXTP require the transition table model, which is not yet implemented. Only BR<cc> and BRBTST<cc> are modeled.
 
-- **No fetch-decode-execute loop**: `model/main.sail` only includes files; there is no `step()` function that fetches from instruction memory. Tests call `execute()` directly with constructed instruction values.
+- **Instruction memory uses pinstr array, not binary encoding**: The fetch-decode-execute loop uses a `vector(256, pinstr)` for instruction memory. Instructions are stored as union values, not binary-encoded bytes. When XISA binary encodings become available, replace with byte-level memory and add `mapping clause encdec` for each instruction. The `execute` function is unchanged — only the fetch/decode path changes.
+
+- **Instruction memory limited to 256 slots**: Sail requires a literal default value for vector registers of union types. 256 is sufficient for parser programs but could be increased by generating a larger literal or switching to binary encoding.
 
 - **Sail idiom opportunities**: `extract_bits` and `insert_bits` in `state.sail` are custom helpers using shifts and masks. Sail's standard library may have built-in equivalents (`vector_subrange`, `vector_update_subrange`) that would be more idiomatic. Investigate and refactor if so.
 
