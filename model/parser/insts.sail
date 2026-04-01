@@ -681,4 +681,97 @@ function clause execute(PBRNXTP(cc, jump_mode, addr_or_rule)) = {
     RETIRE_SUCCESS
 }
 
+// EXTNXTP: Extract data from packet into register, then NXTP lookup with extracted key.
+// Combines EXT (at dest offset 0) + NXTP in one instruction. Size limited to 1-24 bits.
+function clause execute(PEXTNXTP(rd, src_offset_bits, size_bits, clear_dest)) = {
+    let soff = unsigned(src_offset_bits);
+    let sz = unsigned(size_bits);
+    let cursor_bit_offset = unsigned(pcursor) * 8;
+    let packet_bit_offset = cursor_bit_offset + soff;
+
+    // Packet extraction logic (same as EXT)
+    let pbo_bv : bits(20) = get_slice_int(20, packet_bit_offset, 0);
+    let start_byte = unsigned(sail_shiftright(pbo_bv, 3));
+    let bit_in_byte = unsigned(pbo_bv & 0x00007);
+
+    let sum_bv : bits(20) = get_slice_int(20, bit_in_byte + sz + 7, 0);
+    let bytes_needed = unsigned(sail_shiftright(sum_bv, 3));
+
+    var acc : bits128 = sail_zeros(128);
+    var i : int = 0;
+    while i < bytes_needed do {
+        let byte_idx : int = start_byte + i;
+        let byte_val : bits128 = sail_zero_extend(read_packet_byte(byte_idx), 128);
+        acc = acc | sail_shiftleft(byte_val, 8 * (bytes_needed - 1 - i));
+        i = i + 1
+    };
+
+    let shift_amount : int = bytes_needed * 8 - bit_in_byte - sz;
+    let extracted : bits128 = sail_shiftright(acc, shift_amount) & sail_mask(128, sail_ones(sz));
+
+    // Write to destination register at offset 0
+    let dst_val : bits128 = if clear_dest then sail_zeros(128) else read_preg(rd);
+    let result = insert_bits(dst_val, 0, sz, extracted);
+    write_preg(rd, result);
+
+    // NXTP: use extracted value as transition key (up to 24 bits)
+    let key : bits24 = sail_mask(24, extracted);
+    nxtp_matched = transition_lookup(parser_state, key);
+    RETIRE_SUCCESS
+}
+
+// BRBTSTNXTP: Test bit in register, branch to next protocol if condition met.
+// Combines BRBTST condition check + BRNXTP branch logic.
+function clause execute(PBRBTSTNXTP(btcc, rs, bit_offset, jump_mode, addr_or_rule)) = {
+    let src_val = read_preg(rs);
+    let boff : nat = unsigned(bit_offset);
+    let bit_val = extract_bits(src_val, boff, 1);
+    let bit_is_set = bit_val != sail_zeros(128);
+    let take_branch : bool = match btcc {
+        PBT_CLR => not_bool(bit_is_set),
+        PBT_SET => bit_is_set,
+    };
+    if take_branch then {
+        if nxtp_matched then {
+            ppc = nxtp_result_pc;
+            parser_state = nxtp_result_state
+        } else {
+            let mode : int = unsigned(jump_mode);
+            if mode == 0 then {
+                ()
+            } else if mode == 1 then {
+                ()
+            } else if mode == 2 then {
+                ppc = addr_or_rule
+            } else if mode == 3 then {
+                let idx : int = unsigned(addr_or_rule);
+                ppc = read_tt_next_pc(idx);
+                parser_state = read_tt_next_state(idx)
+            } else {
+                ()
+            }
+        }
+    };
+    RETIRE_SUCCESS
+}
+
+// BRBTSTNS: Test bit in register, branch to next state from transition rule if condition met.
+// Combines BRBTST condition check + BRNS branch logic.
+function clause execute(PBRBTSTNS(btcc, rs, bit_offset, rule_num)) = {
+    let src_val = read_preg(rs);
+    let boff : nat = unsigned(bit_offset);
+    let bit_val = extract_bits(src_val, boff, 1);
+    let bit_is_set = bit_val != sail_zeros(128);
+    let take_branch : bool = match btcc {
+        PBT_CLR => not_bool(bit_is_set),
+        PBT_SET => bit_is_set,
+    };
+    if take_branch then {
+        let idx : int = unsigned(rule_num);
+        ppc = read_tt_next_pc(idx);
+        parser_state = read_tt_next_state(idx)
+    };
+    RETIRE_SUCCESS
+}
+
 end execute
