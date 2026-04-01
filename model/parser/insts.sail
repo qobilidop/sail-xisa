@@ -429,6 +429,24 @@ function clause execute(PSTHC(incr_value, present_id, offset_id)) = {
     RETIRE_SUCCESS
 }
 
+// ST: Struct0[struct_off + size - 1 : struct_off] = SrcReg[src_off + size - 1 : src_off]
+// Copies a bit-field from a parser register into Struct-0.
+// Optionally halt (.H modifier) after the store.
+function clause execute(PST(rs, src_offset_bits, struct_offset_bits, size_bits, halt)) = {
+    let src_val = read_preg(rs);
+    let soff : nat = unsigned(src_offset_bits);
+    let doff : nat = unsigned(struct_offset_bits);
+    let sz : nat = unsigned(size_bits);
+    let extracted = extract_bits(src_val, soff, sz);
+    struct0 = insert_bits(struct0, doff, sz, extracted);
+    if halt then {
+        parser_halted = true;
+        RETIRE_HALT
+    } else {
+        RETIRE_SUCCESS
+    }
+}
+
 // STI: Struct0[struct_off + size - 1 : struct_off] = ImmediateValue[size-1:0]
 // Stores an immediate value (up to 16 bits) into Struct-0.
 function clause execute(PSTI(immediate, struct_offset_bits, size_bits)) = {
