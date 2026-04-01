@@ -62,8 +62,19 @@ parser/params.sail  → documentation only (no code dependencies)
 parser/types.sail   → pinstr union, pregidx enum
 parser/transition.sail → transition table (depends on types for bits24)
 parser/pseek.sail   → PSEEK table (depends on types)
-parser/state.sail   → parser registers, init (calls transition_table_init, pseek_table_init)
-parser/decode.sail  → placeholder
+parser/decode.sail  → encdec mapping (pinstr <-> bits(64)), encode/decode helpers
+parser/state.sail   → parser registers, init (uses encode_pinstr from decode)
 parser/insts.sail   → execute clauses (depends on everything above)
-parser/exec.sail    → fetch-decode-execute loop
+parser/exec.sail    → fetch-decode-execute loop (decodes on every fetch)
 ```
+
+## Instruction Encoding
+
+64-bit fixed-width binary encoding. See `docs/specs/2026-04-01-binary-encoding-design.md` for the opcode table and field layout.
+
+- Opcode: bits [63:58] (6 bits)
+- Fields: packed MSB-first after opcode, zero-padded at LSB
+- NOP = `0x0000000000000000` (opcode 0)
+- Encoding/decoding: `encdec` scattered mapping in `model/parser/decode.sail`
+- `encode_pinstr(instr)` / `decode_pinstr(bits)` wrapper functions
+- Tests use `pinstr` union values — `parser_load_program` encodes internally
