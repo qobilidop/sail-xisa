@@ -370,4 +370,13 @@ function clause execute(PBRBTST(btcc, rs, bit_offset, target)) = {
     RETIRE_SUCCESS
 }
 
+// STCI: Cursor += IncrValue.
+// Increments the parser cursor by an immediate value (1-256).
+// Value is truncated to 8 bits to match cursor width.
+function clause execute(PSTCI(incr_value)) = {
+    let incr_8 : bits8 = sail_mask(8, incr_value);
+    pcursor = pcursor + incr_8;
+    RETIRE_SUCCESS
+}
+
 end execute
