@@ -11,23 +11,36 @@
 #   TEST_NAME  - name for the test (used as executable name and CTest label)
 #   TEST_SAIL  - path to the test .sail file
 #
-# The test Sail file is compiled together with all model files.
-# Sail generates C, which is compiled with gcc and linked against libgmp and the Sail runtime.
+# The test Sail file is compiled together with model/main.sail (which $includes
+# all other model files). The test defines a Sail main() which Sail wraps.
 function(add_sail_test TEST_NAME TEST_SAIL)
-    set(TEST_C "${CMAKE_CURRENT_BINARY_DIR}/${TEST_NAME}.c")
+    # Sail's -o flag appends .c to the given name, so -o foo produces foo.c
+    set(SAIL_OUT_STEM "${CMAKE_CURRENT_BINARY_DIR}/${TEST_NAME}")
+    set(TEST_C "${SAIL_OUT_STEM}.c")
     set(TEST_EXE "${CMAKE_CURRENT_BINARY_DIR}/${TEST_NAME}")
 
     # Step 1: Sail -> C
+    # model/main.sail $includes all model files, so we only pass it + the test file.
     add_custom_command(
         OUTPUT ${TEST_C}
-        COMMAND ${SAIL} -c ${MODEL_SAIL_FILES} ${CMAKE_SOURCE_DIR}/${TEST_SAIL} -o ${TEST_C}
+        COMMAND ${SAIL} -c
+            ${CMAKE_SOURCE_DIR}/model/main.sail
+            ${CMAKE_SOURCE_DIR}/${TEST_SAIL}
+            -o ${SAIL_OUT_STEM}
         DEPENDS ${MODEL_SAIL_FILES} ${CMAKE_SOURCE_DIR}/${TEST_SAIL}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         COMMENT "Compiling Sail test ${TEST_NAME} to C..."
     )
 
     # Step 2: C -> executable
-    add_executable(${TEST_NAME} ${TEST_C} ${SAIL_DIR}/lib/sail.c)
+    # Link against Sail runtime and dependencies.
+    add_executable(${TEST_NAME}
+        ${TEST_C}
+        ${SAIL_DIR}/lib/sail.c
+        ${SAIL_DIR}/lib/rts.c
+        ${SAIL_DIR}/lib/elf.c
+        ${SAIL_DIR}/lib/sail_failure.c
+    )
     target_include_directories(${TEST_NAME} PRIVATE ${SAIL_DIR}/lib)
     target_link_libraries(${TEST_NAME} PRIVATE gmp z)
     target_compile_options(${TEST_NAME} PRIVATE -O2)
@@ -35,3 +48,5 @@ function(add_sail_test TEST_NAME TEST_SAIL)
     # Step 3: Register with CTest
     add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
 endfunction()
+
+add_sail_test(test_nop test/parser/test_nop.sail)

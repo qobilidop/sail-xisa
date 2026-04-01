@@ -17,9 +17,13 @@ message(STATUS "Sail directory: ${SAIL_DIR}")
 # Collect all model Sail files
 file(GLOB_RECURSE MODEL_SAIL_FILES "${CMAKE_SOURCE_DIR}/model/*.sail")
 
+# The main entry point includes all model files via $include.
+set(MODEL_MAIN "${CMAKE_SOURCE_DIR}/model/main.sail")
+
 # Target: type-check the model (fast, no C compilation)
+# Use model/main.sail which $includes everything in the right order.
 add_custom_target(check
-    COMMAND ${SAIL} --just-check ${MODEL_SAIL_FILES}
+    COMMAND ${SAIL} --just-check ${MODEL_MAIN}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "Type-checking Sail model..."
     SOURCES ${MODEL_SAIL_FILES}
