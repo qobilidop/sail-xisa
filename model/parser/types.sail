@@ -140,4 +140,12 @@ union clause pinstr = PSTCH : (bits16, bits8, bits8, bool)
 // Fields: (incr_value, header_present_id, header_offset_id)
 union clause pinstr = PSTHC : (bits16, bits8, bits8)
 
+// ST: Store register sub-field into Struct-0.
+// Fields: (src_reg, src_offset_bits, struct_offset_bits, size_bits, halt)
+union clause pinstr = PST : (pregidx, bits8, bits8, bits8, bool)
+
+// STI: Store immediate value into Struct-0.
+// Fields: (immediate_value, struct_offset_bits, size_bits)
+union clause pinstr = PSTI : (bits16, bits8, bits8)
+
 end pinstr
