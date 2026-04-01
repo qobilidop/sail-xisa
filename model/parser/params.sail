@@ -30,3 +30,15 @@
 //   Next proto size:    8 bits (bits8), size in bits
 //
 // See docs/specs/2026-04-01-pseek-design.md for assumptions.
+
+// Instruction memory and PC.
+// The spec does not define instruction memory capacity, PC width,
+// or branch address field width. All are coupled to the same choice.
+//
+// Parameters:
+//   PC width:           16 bits (bits16), range 0-65535
+//   Instruction memory: 65536 entries of 64-bit encoded words
+//   Encoding:           64-bit fixed-width, 6-bit opcode
+//   NOP encoding:       0x0000000000000000 (opcode 0)
+//
+// See docs/specs/2026-04-01-binary-encoding-design.md for the opcode table.

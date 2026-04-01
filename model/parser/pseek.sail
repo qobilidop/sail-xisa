@@ -117,4 +117,3 @@ function pseek_lookup(class_id, proto_val) = {
     result
 }
 
-// pseek_extract_proto is defined in insts.sail (needs read_packet_byte from state.sail)
