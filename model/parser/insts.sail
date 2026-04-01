@@ -406,4 +406,27 @@ function clause execute(PSTH(present_id, offset_id, halt)) = {
     }
 }
 
+// STCH: Increment cursor, then set header (STCI + STH compound).
+// The header offset records the NEW cursor position (after increment).
+function clause execute(PSTCH(incr_value, present_id, offset_id, halt)) = {
+    let incr_8 : bits8 = sail_mask(8, incr_value);
+    pcursor = pcursor + incr_8;
+    set_hdr(present_id, offset_id);
+    if halt then {
+        parser_halted = true;
+        RETIRE_HALT
+    } else {
+        RETIRE_SUCCESS
+    }
+}
+
+// STHC: Set header at current cursor, then increment cursor (STH + STCI compound).
+// The header offset records the OLD cursor position (before increment).
+function clause execute(PSTHC(incr_value, present_id, offset_id)) = {
+    set_hdr(present_id, offset_id);
+    let incr_8 : bits8 = sail_mask(8, incr_value);
+    pcursor = pcursor + incr_8;
+    RETIRE_SUCCESS
+}
+
 end execute
