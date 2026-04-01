@@ -20,11 +20,11 @@ Tracks which XISA instructions are formally specified in Sail. Section numbers r
 | 12 | MOVMAP | 3.12.5 | Not started | Requires MAP register model |
 | 13 | CNCTBY | 3.12.6 | Done | |
 | 14 | CNCTBI | 3.12.6 | Done | |
-| 15 | STH | 3.12.7 | Not started | Requires HDR model |
+| 15 | STH | 3.12.7 | Done | .H supported. No JumpMode, .SCSM, .ECSM yet |
 | 16 | STC | 3.12.8 | Done | No JumpMode, .SCSM, .ECSM yet |
 | 17 | STCI | 3.12.8 | Done | No JumpMode, .SCSM, .ECSM yet |
-| 18 | STCH | 3.12.9 | Not started | |
-| 19 | STHC | 3.12.9 | Not started | |
+| 18 | STCH | 3.12.9 | Done | .H supported. No JumpMode, .SCSM, .ECSM yet |
+| 19 | STHC | 3.12.9 | Done | No JumpMode, .SCSM, .ECSM yet |
 | 20 | ST | 3.12.10 | Not started | Requires Struct model |
 | 21 | STI | 3.12.10 | Not started | |
 | 22 | MOVL/MOVR variants | 3.12.12 | Not started | 6 sub-variants |
