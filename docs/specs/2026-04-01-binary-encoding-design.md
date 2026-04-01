@@ -135,3 +135,4 @@ Replace the placeholder with:
 - Opcode 0 = NOP ensures zeroed memory is safe
 - Field packing order matches union clause field order (left-to-right → MSB-first)
 - Unknown opcodes decode to NOP (safe default, no trap)
+- Parser PC width (bits16) and instruction memory size (65536) are both implementation-chosen — the spec does not define either. Documented in `model/parser/params.sail`
