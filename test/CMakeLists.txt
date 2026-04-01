@@ -50,3 +50,4 @@ function(add_sail_test TEST_NAME TEST_SAIL)
 endfunction()
 
 add_sail_test(test_nop test/parser/test_nop.sail)
+add_sail_test(test_halt test/parser/test_halt.sail)
