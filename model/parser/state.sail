@@ -52,270 +52,9 @@ function init_hdr_offset() = [
 // Parser program counter.
 register ppc : bits16
 
-// Instruction memory: 256 slots of pinstr values.
-// No binary encoding — instructions are stored directly.
-// Future: replace with byte-level memory + encdec mapping.
-val init_pimem : unit -> vector(256, pinstr)
-function init_pimem() = [
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-    PNOP(),
-]
-
-register pimem : vector(256, pinstr) = init_pimem()
+// Instruction memory: 65536 slots of 64-bit encoded instructions.
+// NOP = 0x0000000000000000 (opcode 0). See model/parser/params.sail.
+register pimem : vector(65536, bits(64))
 
 // Condition flags (set by arithmetic/compare instructions).
 register pflag_z :
@@ -362,6 +101,30 @@ function set_hdr(present_id, offset_id) = {
     hdr_offset[oid] = pcursor
 }
 
+// Write a raw 64-bit value into instruction memory (with bounds check).
+val write_pimem_raw : (int, bits(64)) -> unit
+function write_pimem_raw(idx, v) = {
+    assert(0 <= idx & idx < 65536, "pimem index out of bounds");
+    pimem[idx] = v
+}
+
+// Read a raw 64-bit value from instruction memory (with bounds check).
+val read_pimem_raw : int -> bits(64)
+function read_pimem_raw(idx) = {
+    assert(0 <= idx & idx < 65536, "pimem index out of bounds");
+    pimem[idx]
+}
+
+// Zero a range of instruction memory (for init and program loading).
+val pimem_zero_range : (int, int) -> unit
+function pimem_zero_range(start, count) = {
+    var i : int = start;
+    while i < start + count do {
+        write_pimem_raw(i, sail_zeros(64));
+        i = i + 1
+    }
+}
+
 // Initialize parser state (called before running a parser program).
 val parser_init : unit -> unit
 function parser_init() = {
@@ -393,17 +156,14 @@ function parser_init() = {
     // Reset MAP registers
     MAP = init_map();
 
-    // Reset instruction memory to all NOPs
-    pimem = init_pimem()
+    // Reset instruction memory (first 256 entries — sufficient for test programs)
+    pimem_zero_range(0, 256)
 }
 
-// Load a program (list of instructions) into instruction memory starting at address 0.
-// Remaining slots are filled with NOP. Resets ppc to 0.
-// Write an instruction into instruction memory at the given index.
+// Write an encoded instruction into instruction memory at the given index.
 val write_pimem : (int, pinstr) -> unit
 function write_pimem(idx, instr) = {
-    assert(0 <= idx & idx < 256, "instruction memory index out of bounds");
-    pimem[idx] = instr
+    write_pimem_raw(idx, encode_pinstr(instr))
 }
 
 val parser_load_program_rec : (list(pinstr), int) -> unit
@@ -417,10 +177,12 @@ function parser_load_program_rec(instrs, idx) = {
     }
 }
 
+// Load a program (list of pinstr) into instruction memory.
+// Encodes each instruction to binary. Resets ppc to 0.
 val parser_load_program : list(pinstr) -> unit
 function parser_load_program(instrs) = {
     ppc = sail_zeros(16);
-    pimem = init_pimem();
+    pimem_zero_range(0, 256);
     parser_load_program_rec(instrs, 0)
 }
 

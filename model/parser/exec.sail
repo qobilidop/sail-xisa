@@ -1,11 +1,11 @@
 // Parser fetch-decode-execute loop.
 
-// Execute one step: fetch instruction at ppc, advance ppc, execute.
+// Execute one step: fetch encoded instruction at ppc, decode, advance ppc, execute.
 val parser_step : unit -> ExecutionResult
 function parser_step() = {
     let pc_idx : int = unsigned(ppc);
-    assert(0 <= pc_idx & pc_idx < 256, "ppc out of instruction memory bounds");
-    let instr = pimem[pc_idx];
+    let encoded : bits(64) = read_pimem_raw(pc_idx);
+    let instr : pinstr = decode_pinstr(encoded);
 
     // Advance PC before execute (branch instructions may overwrite it)
     ppc = ppc + 0x0001;

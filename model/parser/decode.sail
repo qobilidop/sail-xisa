@@ -61,11 +61,11 @@ mapping clause encdec = PPSEEKNXTP(rd, doff, rs, soff, sz, cid)
 
 // Opcode  5: EXT (3+8+16+8+1 = 36 field bits, 22 padding)
 mapping clause encdec = PEXT(rd, doff, soff, sz, cd)
-    <-> 0b000101 @ encdec_pregidx(rd) @ doff @ soff @ sz @ encdec_bool(cd) @ 0b0 : bits(1) @ 0x00000 : bits(20)
+    <-> 0b000101 @ encdec_pregidx(rd) @ doff @ soff @ sz @ encdec_bool(cd) @ 0b00 : bits(2) @ 0x00000 : bits(20)
 
 // Opcode  6: EXTNXTP (3+16+8+1 = 28 field bits, 30 padding)
 mapping clause encdec = PEXTNXTP(rd, soff, sz, cd)
-    <-> 0b000110 @ encdec_pregidx(rd) @ soff @ sz @ encdec_bool(cd) @ 0b0 : bits(1) @ 0x0000000 : bits(28)
+    <-> 0b000110 @ encdec_pregidx(rd) @ soff @ sz @ encdec_bool(cd) @ 0b00 : bits(2) @ 0x0000000 : bits(28)
 
 // Opcode  7: EXTMAP (4+8+16+8 = 36 field bits, 22 padding)
 mapping clause encdec = PEXTMAP(midx, doff, poff, sz)
@@ -97,7 +97,7 @@ mapping clause encdec = PSTCI(incr)
 
 // Opcode 14: STCH (16+8+8+1 = 33 field bits, 25 padding)
 mapping clause encdec = PSTCH(incr, pid, oid, halt)
-    <-> 0b001110 @ incr @ pid @ oid @ encdec_bool(halt) @ 0x000000 : bits(24)
+    <-> 0b001110 @ incr @ pid @ oid @ encdec_bool(halt) @ 0b0 : bits(1) @ 0x000000 : bits(24)
 
 // Opcode 15: STHC (16+8+8 = 32 field bits, 26 padding)
 mapping clause encdec = PSTHC(incr, pid, oid)
@@ -105,7 +105,7 @@ mapping clause encdec = PSTHC(incr, pid, oid)
 
 // Opcode 16: ST (3+8+8+8+1 = 28 field bits, 30 padding)
 mapping clause encdec = PST(rs, soff, doff, sz, halt)
-    <-> 0b010000 @ encdec_pregidx(rs) @ soff @ doff @ sz @ encdec_bool(halt) @ 0b0 : bits(1) @ 0x0000000 : bits(28)
+    <-> 0b010000 @ encdec_pregidx(rs) @ soff @ doff @ sz @ encdec_bool(halt) @ 0b00 : bits(2) @ 0x0000000 : bits(28)
 
 // Opcode 17: STI (16+8+8 = 32 field bits, 26 padding)
 mapping clause encdec = PSTI(imm, doff, sz)
@@ -125,7 +125,7 @@ mapping clause encdec = PMOVL(rd, rs1, o1, sz1, rs2, o2, sz2, cd)
 
 // Opcode 21: MOVLI (3+3+8+8+8+1 = 31 field bits, 27 padding)
 mapping clause encdec = PMOVLI(rd, rs, off, sz, imm, cd)
-    <-> 0b010101 @ encdec_pregidx(rd) @ encdec_pregidx(rs) @ off @ sz @ imm @ encdec_bool(cd) @ 0b00 : bits(2) @ 0x000000 : bits(24)
+    <-> 0b010101 @ encdec_pregidx(rd) @ encdec_pregidx(rs) @ off @ sz @ imm @ encdec_bool(cd) @ 0b000 : bits(3) @ 0x000000 : bits(24)
 
 // Opcode 22: MOVLII (3+3+8+8+8+8+1 = 39 field bits, 19 padding)
 mapping clause encdec = PMOVLII(rd, rs, off, sz, imm, isz, cd)
@@ -137,7 +137,7 @@ mapping clause encdec = PMOVR(rd, rs1, o1, sz1, rs2, o2, sz2, cd)
 
 // Opcode 24: MOVRI (3+3+8+8+8+1 = 31 field bits, 27 padding)
 mapping clause encdec = PMOVRI(rd, rs, off, sz, imm, cd)
-    <-> 0b011000 @ encdec_pregidx(rd) @ encdec_pregidx(rs) @ off @ sz @ imm @ encdec_bool(cd) @ 0b00 : bits(2) @ 0x000000 : bits(24)
+    <-> 0b011000 @ encdec_pregidx(rd) @ encdec_pregidx(rs) @ off @ sz @ imm @ encdec_bool(cd) @ 0b000 : bits(3) @ 0x000000 : bits(24)
 
 // Opcode 25: MOVRII (3+3+8+8+8+8+1 = 39 field bits, 19 padding)
 mapping clause encdec = PMOVRII(rd, rs, off, sz, imm, isz, cd)
