@@ -429,4 +429,14 @@ function clause execute(PSTHC(incr_value, present_id, offset_id)) = {
     RETIRE_SUCCESS
 }
 
+// STI: Struct0[struct_off + size - 1 : struct_off] = ImmediateValue[size-1:0]
+// Stores an immediate value (up to 16 bits) into Struct-0.
+function clause execute(PSTI(immediate, struct_offset_bits, size_bits)) = {
+    let doff : nat = unsigned(struct_offset_bits);
+    let sz : nat = unsigned(size_bits);
+    let imm_128 : bits128 = sail_zero_extend(immediate, 128);
+    struct0 = insert_bits(struct0, doff, sz, imm_128);
+    RETIRE_SUCCESS
+}
+
 end execute
