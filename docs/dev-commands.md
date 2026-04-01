@@ -38,6 +38,16 @@ devcontainer build --workspace-folder .
 ./dev.sh ctest --test-dir build -R test_nop --verbose
 ```
 
+## Formatting
+
+```bash
+# Format all Sail files
+./dev.sh tools/format.sh
+
+# Check formatting (CI mode — fails if files aren't formatted)
+./dev.sh tools/format.sh --check
+```
+
 ## Interactive
 
 ```bash

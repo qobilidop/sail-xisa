@@ -1,5 +1,8 @@
 # Sail XISA
 
+[![CI](https://github.com/qobilidop/sail-xisa/actions/workflows/ci.yml/badge.svg)](https://github.com/qobilidop/sail-xisa/actions/workflows/ci.yml)
+[![Build Dev Container](https://github.com/qobilidop/sail-xisa/actions/workflows/build-devcontainer.yml/badge.svg)](https://github.com/qobilidop/sail-xisa/actions/workflows/build-devcontainer.yml)
+
 A formal specification of [XISA](https://xsightlabs.com/switches/xisa) (Xsight Labs' X-Switch Instruction Set Architecture) written in [Sail](https://github.com/rems-project/sail). See the public [white paper](https://cdn.sanity.io/files/eqivwe42/production/affd0d0005566d4d8c50e05eff7fb60a43049a9f.pdf) for the XISA reference.
 
 XISA defines packet processing for the X-Switch family of programmable network switches. This project provides a machine-readable, executable formal model of the ISA, inspired by the [Sail RISC-V model](https://github.com/riscv/sail-riscv).
