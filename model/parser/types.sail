@@ -128,4 +128,16 @@ union clause pinstr = PSTC : (pregidx, bits8, bits8, bits8, bits8)
 // Fields: (incr_value)
 union clause pinstr = PSTCI : bits16
 
+// STH: Set header present and offset fields at current cursor position.
+// Fields: (header_present_id, header_offset_id, halt)
+union clause pinstr = PSTH : (bits8, bits8, bool)
+
+// STCH: Set cursor then header fields (STCI + STH compound).
+// Fields: (incr_value, header_present_id, header_offset_id, halt)
+union clause pinstr = PSTCH : (bits16, bits8, bits8, bool)
+
+// STHC: Set header fields then cursor (STH + STCI compound).
+// Fields: (incr_value, header_present_id, header_offset_id)
+union clause pinstr = PSTHC : (bits16, bits8, bits8)
+
 end pinstr
