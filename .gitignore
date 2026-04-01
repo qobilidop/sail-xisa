@@ -1,0 +1,5 @@
+# CMake build directory
+build/
+
+# Sail SMT solver cache
+sail_smt_cache/
