@@ -156,4 +156,28 @@ union clause pinstr = PEXTMAP : (bits4, bits8, bits16, bits8)
 // Fields: (map_reg_idx, dest_offset_bits, src_reg, src_offset_bits, size_bits)
 union clause pinstr = PMOVMAP : (bits4, bits8, pregidx, bits8, bits8)
 
+// MOVL: Move left — dest offset = SrcReg2 sub-field + OffsBits1.
+// Fields: (dest_reg, src1_reg, offs1, size1, src2_reg, offs2, size2, clear_dest)
+union clause pinstr = PMOVL : (pregidx, pregidx, bits8, bits8, pregidx, bits8, bits8, bool)
+
+// MOVLI: Move left immediate — dest offset = ImmValue + OffsBits.
+// Fields: (dest_reg, src_reg, offs, size, imm_value, clear_dest)
+union clause pinstr = PMOVLI : (pregidx, pregidx, bits8, bits8, bits8, bool)
+
+// MOVLII: Move left immediate with immediate data — dest offset from register, data from immediate.
+// Fields: (dest_reg, src_reg, offs, size, imm_value, imm_value_size, clear_dest)
+union clause pinstr = PMOVLII : (pregidx, pregidx, bits8, bits8, bits8, bits8, bool)
+
+// MOVR: Move right — dest offset = OffsBits1 - SrcReg2 sub-field.
+// Fields: (dest_reg, src1_reg, offs1, size1, src2_reg, offs2, size2, clear_dest)
+union clause pinstr = PMOVR : (pregidx, pregidx, bits8, bits8, pregidx, bits8, bits8, bool)
+
+// MOVRI: Move right immediate — dest offset = OffsBits - ImmValue.
+// Fields: (dest_reg, src_reg, offs, size, imm_value, clear_dest)
+union clause pinstr = PMOVRI : (pregidx, pregidx, bits8, bits8, bits8, bool)
+
+// MOVRII: Move right immediate with immediate data — dest from ImmValueSize - register sub-field.
+// Fields: (dest_reg, src_reg, offs, size, imm_value, imm_value_size, clear_dest)
+union clause pinstr = PMOVRII : (pregidx, pregidx, bits8, bits8, bits8, bits8, bool)
+
 end pinstr
