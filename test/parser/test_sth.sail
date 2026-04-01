@@ -86,6 +86,44 @@ function test_stch_vs_sthc_ordering() = {
     assert(sthc_offset == 0x04, "STHC should record offset=4 (old cursor)")
 }
 
+// Program: Parse two protocol headers from a packet.
+// Packet: [Eth header 14 bytes] [IPv4 header 20 bytes] [payload...]
+//
+// Step 1: STHC(14, 0, 0) — record Ethernet at offset 0, advance cursor to 14
+// Step 2: EXT 8 bits at cursor=14 into R0 (first byte of IPv4)
+// Step 3: STHC(20, 1, 1) — record IPv4 at offset 14, advance cursor to 34
+// Step 4: HALT
+val test_parse_two_headers : unit -> unit
+function test_parse_two_headers() = {
+    parser_init();
+
+    // Fill packet: Ethernet (14 bytes) + IPv4 (starts with version/IHL = 0x45)
+    packet_hdr[14] = 0x45;
+
+    parser_load_program(
+        [|
+            PSTHC(0x000E, 0x00, 0x00),
+            PEXT(PR0, 0x00, 0x0000, 0x08, true),
+            PSTHC(0x0014, 0x01, 0x01),
+            PHALT(false),
+        |],
+    );
+
+    let result = parser_run();
+
+    assert(result == RETIRE_HALT, "program should halt");
+    // Ethernet header recorded at offset 0
+    assert(hdr_present[0] == true, "Ethernet header should be present");
+    assert(hdr_offset[0] == 0x00, "Ethernet header offset should be 0");
+    // IPv4 header recorded at offset 14
+    assert(hdr_present[1] == true, "IPv4 header should be present");
+    assert(hdr_offset[1] == 0x0E, "IPv4 header offset should be 14");
+    // Cursor should be at 34 (14 + 20)
+    assert(pcursor == 0x22, "cursor should be at 34 after both headers");
+    // R0 should have first byte of IPv4 header
+    assert(PR[0] == 0x00000000_00000000_00000000_00000045, "R0 should have IPv4 version/IHL byte")
+}
+
 val main : unit -> unit
 function main() = {
     test_sth_basic();
@@ -94,5 +132,6 @@ function main() = {
     test_stch_basic();
     test_stch_with_halt();
     test_sthc_basic();
-    test_stch_vs_sthc_ordering()
+    test_stch_vs_sthc_ordering();
+    test_parse_two_headers()
 }
