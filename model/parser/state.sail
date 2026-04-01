@@ -15,6 +15,31 @@ register parser_halted : bool
 // Parser drop flag (set by HALTDROP).
 register parser_drop : bool
 
+// Header present flags: 32 entries, indexed by header ID.
+// Assumption: 32 entries is a reasonable default; the white paper does not
+// specify the exact count. Adjust when more information is available.
+register hdr_present : vector(32, bool)
+
+// Header offset values: 32 entries, indexed by header offset ID.
+// Records the cursor position (byte offset) when a header was identified.
+register hdr_offset : vector(32, bits8)
+
+val init_hdr_present : unit -> vector(32, bool)
+function init_hdr_present() = [
+    false, false, false, false, false, false, false, false,
+    false, false, false, false, false, false, false, false,
+    false, false, false, false, false, false, false, false,
+    false, false, false, false, false, false, false, false,
+]
+
+val init_hdr_offset : unit -> vector(32, bits8)
+function init_hdr_offset() = [
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+]
+
 // Parser program counter.
 register ppc : bits16
 
@@ -316,6 +341,18 @@ function write_preg(r, v) =
         PR[pregidx_to_nat(r)] = v
     }
 
+// Set header present flag and offset for the given IDs.
+// Uses the current cursor position as the offset value.
+val set_hdr : (bits8, bits8) -> unit
+function set_hdr(present_id, offset_id) = {
+    let pid : int = unsigned(present_id);
+    let oid : int = unsigned(offset_id);
+    assert(0 <= pid & pid < 32, "header present ID out of bounds");
+    assert(0 <= oid & oid < 32, "header offset ID out of bounds");
+    hdr_present[pid] = true;
+    hdr_offset[oid] = pcursor
+}
+
 // Initialize parser state (called before running a parser program).
 val parser_init : unit -> unit
 function parser_init() = {
@@ -329,6 +366,10 @@ function parser_init() = {
     parser_drop = false;
     pflag_z = false;
     pflag_n = false;
+
+    // Reset header metadata
+    hdr_present = init_hdr_present();
+    hdr_offset = init_hdr_offset();
 
     // Reset instruction memory to all NOPs
     pimem = init_pimem()
