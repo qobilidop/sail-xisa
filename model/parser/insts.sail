@@ -370,6 +370,21 @@ function clause execute(PBRBTST(btcc, rs, bit_offset, target)) = {
     RETIRE_SUCCESS
 }
 
+// STC: Cursor += ((SrcReg[offset+size-1:offset] + AdditionalIncr) << SrcShift)
+// Extracts 1-8 bits from a register sub-field, adds AdditionalIncr,
+// left-shifts by SrcShift, and adds the result to the cursor.
+function clause execute(PSTC(rs, src_offset_bits, src_size_bits, src_shift, additional_incr)) = {
+    let src_val = read_preg(rs);
+    let soff : nat = unsigned(src_offset_bits);
+    let sz : nat = unsigned(src_size_bits);
+    let extracted = extract_bits(src_val, soff, sz);
+    let base : bits8 = sail_mask(8, extracted) + sail_mask(8, additional_incr);
+    let shift_amount : nat = unsigned(src_shift);
+    let shifted : bits8 = sail_shiftleft(base, shift_amount);
+    pcursor = pcursor + shifted;
+    RETIRE_SUCCESS
+}
+
 // STCI: Cursor += IncrValue.
 // Increments the parser cursor by an immediate value (1-256).
 // Value is truncated to 8 bits to match cursor width.
