@@ -18,8 +18,8 @@ Tracks which XISA instructions are formally specified in Sail.
 | 10 | PSEEKNXTP | 3.12.2 | Not started | |
 | 11 | EXTMAP | 3.12.4 | Not started | Requires MAP register model |
 | 12 | MOVMAP | 3.12.5 | Not started | Requires MAP register model |
-| 13 | CNCTBY | 3.12.6 | Not started | |
-| 14 | CNCTBI | 3.12.6 | Not started | |
+| 13 | CNCTBY | 3.12.6 | Done | |
+| 14 | CNCTBI | 3.12.6 | Done | |
 | 15 | STH | 3.12.7 | Not started | Requires HDR model |
 | 16 | STC | 3.12.8 | Not started | |
 | 17 | STCI | 3.12.8 | Not started | |
@@ -28,11 +28,11 @@ Tracks which XISA instructions are formally specified in Sail.
 | 20 | ST | 3.12.10 | Not started | Requires Struct model |
 | 21 | STI | 3.12.10 | Not started | |
 | 22 | MOVL/MOVR variants | 3.12.12 | Not started | 6 sub-variants |
-| 23 | ADD/ADDI | 3.12.13 | Not started | |
-| 24 | SUB/SUBI/SUBII | 3.12.14 | Not started | |
-| 25 | AND/ANDI | 3.12.15 | Not started | |
-| 26 | OR/ORI | 3.12.16 | Not started | |
-| 27 | CMP/CMPIBY/CMPIBI | 3.12.17 | Not started | |
+| 23 | ADD/ADDI | 3.12.13 | Done | No .CD modifier |
+| 24 | SUB/SUBI/SUBII | 3.12.14 | Done | No .CD modifier |
+| 25 | AND/ANDI | 3.12.15 | Done | No .CD modifier |
+| 26 | OR/ORI | 3.12.16 | Done | No .CD modifier |
+| 27 | CMP/CMPIBY/CMPIBI | 3.12.17 | Done | |
 | 28 | BR variants | 3.12.18 | Not started | 6 sub-variants |
 
 ## MAP ISA (Section 4 of XISA spec)

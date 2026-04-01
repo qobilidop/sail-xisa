@@ -4,7 +4,7 @@
 
 - **Instruction encoding not modeled**: `model/parser/decode.sail` is a placeholder. The XISA white paper does not publish full binary encoding formats, so we test by constructing instruction union values directly. If encodings become available, add `mapping clause encdec` for each instruction.
 
-- **MOV/MOVI .CD modifier not modeled**: The .CD (clear destination) optional modifier is not yet supported for MOV and MOVI. It should clear the destination register before writing. Currently only EXT supports .CD.
+- **.CD modifier not modeled for most instructions**: The .CD (clear destination) optional modifier is not yet supported for MOV, MOVI, ADD, SUB, AND, OR, or CNCT instructions. It should clear the destination register before writing. Currently only EXT supports .CD.
 
 - **HALT simplifications**: The HALT instruction does not model the `.RP` (reparse) modifier, the optional MAP-PC entry point, or the optional PARSER-PC jump address. These require modeling the MAP thread handoff and reparse flow.
 
