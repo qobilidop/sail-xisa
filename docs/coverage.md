@@ -21,8 +21,8 @@ Tracks which XISA instructions are formally specified in Sail. Section numbers r
 | 13 | CNCTBY | 3.12.6 | Done | |
 | 14 | CNCTBI | 3.12.6 | Done | |
 | 15 | STH | 3.12.7 | Not started | Requires HDR model |
-| 16 | STC | 3.12.8 | Not started | |
-| 17 | STCI | 3.12.8 | Not started | |
+| 16 | STC | 3.12.8 | Done | No JumpMode, .SCSM, .ECSM yet |
+| 17 | STCI | 3.12.8 | Done | No JumpMode, .SCSM, .ECSM yet |
 | 18 | STCH | 3.12.9 | Not started | |
 | 19 | STHC | 3.12.9 | Not started | |
 | 20 | ST | 3.12.10 | Not started | Requires Struct model |
