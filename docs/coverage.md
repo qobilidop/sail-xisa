@@ -1,6 +1,6 @@
 # XISA Spec Coverage
 
-Tracks which XISA instructions are formally specified in Sail.
+Tracks which XISA instructions are formally specified in Sail. Section numbers refer to the [XISA white paper](https://cdn.sanity.io/files/eqivwe42/production/affd0d0005566d4d8c50e05eff7fb60a43049a9f.pdf).
 
 ## Parser ISA (Section 3 of XISA spec)
 
