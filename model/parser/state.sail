@@ -43,10 +43,23 @@ function parser_init() = {
     pflag_n = false;
 }
 
+// Read a byte from the packet header buffer.
+// Uses assert to prove the index is in bounds for the type checker.
+val read_packet_byte : int -> bits8
+function read_packet_byte(idx) = {
+    assert(0 <= idx & idx < 256, "packet byte index out of bounds");
+    packet_hdr[idx]
+}
+
 // Read a range of bits from a 128-bit register value.
 // offset and size are in bits. Big-endian: bit 127 is MSB, bit 0 is LSB.
 // Returns the extracted bits zero-extended to 128 bits (in the low bits).
-val extract_bits : (bits128, nat, nat) -> bits128
+// extract_bits and insert_bits accept 'int' for offset/size because Sail's
+// type checker cannot always prove non-negativity of intermediate arithmetic.
+// The shift and mask functions accept int, and callers using nat (a subtype
+// of int) work seamlessly.
+
+val extract_bits : forall 'o 's, 'o >= 0 & 's >= 0. (bits128, int('o), int('s)) -> bits128
 function extract_bits(reg_val, offset, size) = {
     let mask : bits128 = sail_mask(128, sail_ones(size));
     sail_shiftright(reg_val, offset) & mask
@@ -54,7 +67,7 @@ function extract_bits(reg_val, offset, size) = {
 
 // Write a range of bits into a 128-bit register value.
 // Returns the updated 128-bit value.
-val insert_bits : (bits128, nat, nat, bits128) -> bits128
+val insert_bits : forall 'o 's, 'o >= 0 & 's >= 0. (bits128, int('o), int('s), bits128) -> bits128
 function insert_bits(reg_val, offset, size, data) = {
     let mask : bits128 = sail_shiftleft(sail_mask(128, sail_ones(size)), offset);
     let cleared = reg_val & not_vec(mask);
