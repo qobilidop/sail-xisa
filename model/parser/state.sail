@@ -379,6 +379,9 @@ function parser_init() = {
     // Reset Struct-0 (Standard Metadata)
     struct0 = sail_zeros(128);
 
+    // Reset MAP registers
+    MAP = init_map();
+
     // Reset instruction memory to all NOPs
     pimem = init_pimem()
 }
