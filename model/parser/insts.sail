@@ -622,4 +622,63 @@ function clause execute(PMOVRII(rd, rs, offs, size_bits, imm_value, imm_value_si
     RETIRE_SUCCESS
 }
 
+// NXTP: Extract protocol key from register, look up in transition table.
+// Stores result in nxtp_result_pc/nxtp_result_state/nxtp_matched.
+function clause execute(PNXTP(rs, src_offset_bits, size_bits)) = {
+    let src_val = read_preg(rs);
+    let soff : nat = unsigned(src_offset_bits);
+    let sz : nat = unsigned(size_bits);
+    let extracted = extract_bits(src_val, soff, sz);
+    // Protocol key is up to 24 bits — truncate to bits24.
+    let key : bits24 = sail_mask(24, extracted);
+    nxtp_matched = transition_lookup(parser_state, key);
+    RETIRE_SUCCESS
+}
+
+// BRNS: Branch to the next-state PC from a specific transition rule.
+// Updates parser_state and ppc if condition is met.
+function clause execute(PBRNS(cc, rule_num)) = {
+    if eval_pcond(cc) then {
+        let idx : int = unsigned(rule_num);
+        ppc = read_tt_next_pc(idx);
+        parser_state = read_tt_next_state(idx)
+    };
+    RETIRE_SUCCESS
+}
+
+// BRNXTP: Branch to next-protocol entry point (from NXTP result).
+// JumpMode controls behavior when NXTP had no match.
+// jump_mode encoding: 000=nop, 001=continue, 010=jump to address, 011=use rule
+function clause execute(PBRNXTP(cc, jump_mode, addr_or_rule)) = {
+    if eval_pcond(cc) then {
+        if nxtp_matched then {
+            // Match: branch to NXTP result
+            ppc = nxtp_result_pc;
+            parser_state = nxtp_result_state
+        } else {
+            // No match: follow JumpMode
+            let mode : int = unsigned(jump_mode);
+            if mode == 0 then {
+                // 000: No jump
+                ()
+            } else if mode == 1 then {
+                // 001: Continue to next instruction
+                ()
+            } else if mode == 2 then {
+                // 010: Jump to explicit address
+                ppc = addr_or_rule
+            } else if mode == 3 then {
+                // 011: Transition to state from specified rule
+                let idx : int = unsigned(addr_or_rule);
+                ppc = read_tt_next_pc(idx);
+                parser_state = read_tt_next_state(idx)
+            } else {
+                // 100 (trap) and others: not yet supported
+                ()
+            }
+        }
+    };
+    RETIRE_SUCCESS
+}
+
 end execute
