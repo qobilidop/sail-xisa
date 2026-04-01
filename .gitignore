@@ -2,4 +2,4 @@
 build/
 
 # Sail SMT solver cache
-sail_smt_cache/
+sail_smt_cache
