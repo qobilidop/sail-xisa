@@ -113,10 +113,11 @@ Replace the placeholder with:
 
 ### Modified: `model/parser/state.sail`
 
-- Change `pimem` from `vector(256, pinstr)` to `vector(256, bits(64))`
+- Change `pimem` from `vector(256, pinstr)` to `vector(65536, bits(64))` — matches `ppc` width (bits16)
 - Remove `init_pimem()` (256-line NOP list) — replace with zero-initialized vector
-- Update `write_pimem` to take `bits(64)` or `pinstr` (encode before storing)
+- Update `write_pimem` to accept `pinstr` (encode before storing)
 - Update `parser_load_program` to encode each `pinstr` before storing
+- Update bounds checks from 256 to 65536
 
 ### Modified: `model/parser/exec.sail`
 
