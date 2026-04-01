@@ -9,6 +9,10 @@ register pcursor : bits8
 // Packet header buffer: 256 bytes.
 register packet_hdr : vector(256, bits8)
 
+// Parser state ID for transition table lookups.
+// Tracks which protocol/state the parser is currently in.
+register parser_state : bits8
+
 // Parser halted flag.
 register parser_halted : bool
 
@@ -367,6 +371,7 @@ function parser_init() = {
     PR[3] = sail_zeros(128);
     pcursor = sail_zeros(8);
     ppc = sail_zeros(16);
+    parser_state = sail_zeros(8);
     parser_halted = false;
     parser_drop = false;
     pflag_z = false;
@@ -378,6 +383,9 @@ function parser_init() = {
 
     // Reset Struct-0 (Standard Metadata)
     struct0 = sail_zeros(128);
+
+    // Reset transition table and NXTP result
+    transition_table_init();
 
     // Reset MAP registers
     MAP = init_map();
