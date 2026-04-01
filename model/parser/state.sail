@@ -24,6 +24,11 @@ register hdr_present : vector(32, bool)
 // Records the cursor position (byte offset) when a header was identified.
 register hdr_offset : vector(32, bits8)
 
+// Struct-0: 128-bit Standard Metadata (SMD) register.
+// Passed from the parser to the MAP after parsing completes.
+// Bits 6-31 are HW-controlled in real hardware; not enforced in this model.
+register struct0 : bits128
+
 val init_hdr_present : unit -> vector(32, bool)
 function init_hdr_present() = [
     false, false, false, false, false, false, false, false,
@@ -370,6 +375,9 @@ function parser_init() = {
     // Reset header metadata
     hdr_present = init_hdr_present();
     hdr_offset = init_hdr_offset();
+
+    // Reset Struct-0 (Standard Metadata)
+    struct0 = sail_zeros(128);
 
     // Reset instruction memory to all NOPs
     pimem = init_pimem()
