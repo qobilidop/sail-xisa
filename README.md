@@ -27,7 +27,7 @@ See [docs/dev-commands.md](docs/dev-commands.md) for the full commands reference
 
 ## Status
 
-See [docs/coverage.md](docs/coverage.md) for spec coverage and [docs/todo.md](docs/todo.md) for known issues.
+See [docs/spec-coverage.md](docs/spec-coverage.md) for spec coverage and [docs/todo.md](docs/todo.md) for known issues.
 
 ## License
 
