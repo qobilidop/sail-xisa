@@ -77,3 +77,4 @@ add_sail_test(test_encoding test/parser/test_encoding.sail)
 # MAP ISA tests
 add_sail_test(test_map_nop_halt test/map/test_nop_halt.sail)
 add_sail_test(test_map_mov test/map/test_mov.sail)
+add_sail_test(test_map_add test/map/test_add.sail)

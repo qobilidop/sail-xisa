@@ -4,6 +4,81 @@
 val mexecute : minstr -> ExecutionResult
 scattered function mexecute
 
+// Extract a bit-field from a 32-bit word and zero-extend to 32 bits.
+// When size == 0, treat as 32 (full word) since 32 cannot fit in 5 bits.
+val map_extract : (bits(32), nat, nat) -> bits(32)
+function map_extract(word, offset, size) = {
+    let sz : nat = if size == 0 then 32 else size;
+    let shifted = sail_mask(32, sail_shiftright(sail_zero_extend(word, 64), offset));
+    shifted & sail_mask(32, sail_ones(sz))
+}
+
+// Extract and sign-extend a bit-field from a 32-bit word to 32 bits.
+// When size == 0, treat as 32 (full word) since 32 cannot fit in 5 bits.
+val map_extract_sx : (bits(32), nat, nat) -> bits(32)
+function map_extract_sx(word, offset, size) = {
+    let sz : nat = if size == 0 then 32 else size;
+    let extracted = map_extract(word, offset, sz);
+    let sign_bit = sail_shiftright(extracted, sz - 1) & 0x00000001;
+    if sign_bit == 0x00000001 then {
+        let sign_mask : bits(32) = not_vec(sail_mask(32, sail_ones(sz)));
+        extracted | sign_mask
+    } else {
+        extracted
+    }
+}
+
+// Write result to destination word.
+// Normal mode: writes full 32-bit word.
+// Short mode (.SH): writes only low 16 bits, preserving upper 16.
+val map_write_result : (int, int, bits(32), bool) -> unit
+function map_write_result(rd_idx, rw_idx, result, short_mode) = {
+    if short_mode then {
+        let existing = read_mapword(rd_idx, rw_idx);
+        let merged = (existing & 0xFFFF0000) | (result & 0x0000FFFF);
+        write_mapword(rd_idx, rw_idx, merged)
+    } else {
+        write_mapword(rd_idx, rw_idx, result)
+    }
+}
+
+// Set ZNCV flags for addition.
+val map_set_flags_add : (bits(32), bits(32), bits(32), bool) -> unit
+function map_set_flags_add(op1, op2, result, short_mode) = {
+    let n : nat = if short_mode then 15 else 31;
+    mflag_z = result == 0x00000000;
+    mflag_n = (sail_shiftright(result, n) & 0x00000001) == 0x00000001;
+    let wide_sum : bits(64) = sail_zero_extend(op1, 64) + sail_zero_extend(op2, 64);
+    let limit : nat = if short_mode then 16 else 32;
+    mflag_c = (sail_shiftright(wide_sum, limit) & sail_zero_extend(0x00000001 : bits(32), 64)) != sail_zeros(64);
+    let a_sign = sail_shiftright(op1, n) & 0x00000001;
+    let b_sign = sail_shiftright(op2, n) & 0x00000001;
+    let r_sign = sail_shiftright(result, n) & 0x00000001;
+    mflag_v = (a_sign == b_sign) & (r_sign != a_sign)
+}
+
+// Set ZNCV flags for subtraction (A - B).
+val map_set_flags_sub : (bits(32), bits(32), bits(32), bool) -> unit
+function map_set_flags_sub(op1, op2, result, short_mode) = {
+    let n : nat = if short_mode then 15 else 31;
+    mflag_z = result == 0x00000000;
+    mflag_n = (sail_shiftright(result, n) & 0x00000001) == 0x00000001;
+    mflag_c = unsigned(op1) < unsigned(op2);
+    let a_sign = sail_shiftright(op1, n) & 0x00000001;
+    let b_sign = sail_shiftright(op2, n) & 0x00000001;
+    let r_sign = sail_shiftright(result, n) & 0x00000001;
+    mflag_v = (a_sign != b_sign) & (r_sign != a_sign)
+}
+
+// Set ZNCV flags for logic operations.
+val map_set_flags_logic : bits(32) -> unit
+function map_set_flags_logic(result) = {
+    mflag_z = result == 0x00000000;
+    mflag_n = (sail_shiftright(result, 31) & 0x00000001) == 0x00000001;
+    mflag_c = false;
+    mflag_v = false
+}
+
 // NOP: No operation.
 function clause mexecute(MNOP()) = RETIRE_SUCCESS
 
@@ -33,5 +108,39 @@ function clause mexecute(MMOVI(rd, rw, imm32, clear_dest)) = {
     let rw_idx = mwordsel_to_nat(rw);
     if clear_dest then write_mapreg(rd_idx, sail_zeros(128));
     write_mapword(rd_idx, rw_idx, imm32);
+    RETIRE_SUCCESS
+}
+
+// ADD: Dest[N:0] = Source1[i1:j1] + Source2[i2:j2]
+function clause mexecute(MADD(rd, rw, rs1, sw1, s1off, s1sz, rs2, sw2, s2off, s2sz,
+                              set_flags, sign_extend, short_mode)) = {
+    let rd_idx = mregidx_to_nat(rd);
+    let rw_idx = mwordsel_to_nat(rw);
+    let w1 = read_mapword(mregidx_to_nat(rs1), mwordsel_to_nat(sw1));
+    let w2 = read_mapword(mregidx_to_nat(rs2), mwordsel_to_nat(sw2));
+    let op1 : bits(32) = if sign_extend then map_extract_sx(w1, unsigned(s1off), unsigned(s1sz))
+                          else map_extract(w1, unsigned(s1off), unsigned(s1sz));
+    let op2 : bits(32) = if sign_extend then map_extract_sx(w2, unsigned(s2off), unsigned(s2sz))
+                          else map_extract(w2, unsigned(s2off), unsigned(s2sz));
+    let mask : bits(32) = if short_mode then 0x0000FFFF else 0xFFFFFFFF;
+    let result : bits(32) = (op1 + op2) & mask;
+    if set_flags then map_set_flags_add(op1, op2, result, short_mode);
+    map_write_result(rd_idx, rw_idx, result, short_mode);
+    RETIRE_SUCCESS
+}
+
+// ADDI: Dest[N:0] = Source1[i1:j1] + ImmediateValue
+function clause mexecute(MADDI(rd, rw, rs1, sw1, s1off, s1sz, imm16,
+                               set_flags, sign_extend, short_mode)) = {
+    let rd_idx = mregidx_to_nat(rd);
+    let rw_idx = mwordsel_to_nat(rw);
+    let w1 = read_mapword(mregidx_to_nat(rs1), mwordsel_to_nat(sw1));
+    let op1 : bits(32) = if sign_extend then map_extract_sx(w1, unsigned(s1off), unsigned(s1sz))
+                          else map_extract(w1, unsigned(s1off), unsigned(s1sz));
+    let op2 : bits(32) = sail_zero_extend(imm16, 32);
+    let mask : bits(32) = if short_mode then 0x0000FFFF else 0xFFFFFFFF;
+    let result : bits(32) = (op1 + op2) & mask;
+    if set_flags then map_set_flags_add(op1, op2, result, short_mode);
+    map_write_result(rd_idx, rw_idx, result, short_mode);
     RETIRE_SUCCESS
 }
