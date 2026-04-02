@@ -299,4 +299,49 @@ function clause mexecute(MNOT(rd, rw, rs, sw, soff, sz, set_flags)) = {
     RETIRE_SUCCESS
 }
 
+// Evaluate a MAP branch condition.
+val eval_mcond : mcond -> bool
+function eval_mcond(cc) = match cc {
+    MCC_EQ  => mflag_z,
+    MCC_NEQ => not_bool(mflag_z),
+    MCC_LT  => mflag_n,
+    MCC_GT  => not_bool(mflag_n) & not_bool(mflag_z),
+    MCC_GE  => not_bool(mflag_n),
+    MCC_LE  => mflag_n | mflag_z,
+    MCC_C   => mflag_c,
+    MCC_NC  => not_bool(mflag_c),
+    MCC_V   => mflag_v,
+    MCC_NV  => not_bool(mflag_v),
+    MCC_AL  => true,
+}
+
+// BR: Branch to absolute address in register if condition met.
+function clause mexecute(MBR(cc, rs, sw)) = {
+    if eval_mcond(cc) then {
+        let target = read_mapword(mregidx_to_nat(rs), mwordsel_to_nat(sw));
+        mpc = sail_mask(16, target)
+    };
+    RETIRE_SUCCESS
+}
+
+// BRI: Branch to PC-relative offset if condition met.
+function clause mexecute(MBRI(cc, offset)) = {
+    if eval_mcond(cc) then {
+        mpc = mpc + offset
+    };
+    RETIRE_SUCCESS
+}
+
+// BRBTST: Test bit in register word and branch.
+function clause mexecute(MBRBTST(btcc, rs, sw, bit_offset, target)) = {
+    let word = read_mapword(mregidx_to_nat(rs), mwordsel_to_nat(sw));
+    let bit_val = (sail_shiftright(word, unsigned(bit_offset)) & 0x00000001) == 0x00000001;
+    let take_branch : bool = match btcc {
+        MBT_CLR => not_bool(bit_val),
+        MBT_SET => bit_val,
+    };
+    if take_branch then mpc = target;
+    RETIRE_SUCCESS
+}
+
 end mexecute
