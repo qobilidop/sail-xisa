@@ -39,12 +39,12 @@ union clause pinstr = PNOP : unit
 union clause pinstr = PHALT : bool
 
 // MOV: Copy SizeBits bits from SourceReg at SrcOffset to DestReg at DestOffset.
-// Fields: (dest_reg, dest_offset_bits, src_reg, src_offset_bits, size_bits)
-union clause pinstr = PMOV : (pregidx, bits8, pregidx, bits8, bits8)
+// Fields: (dest_reg, dest_offset_bits, src_reg, src_offset_bits, size_bits, clear_dest)
+union clause pinstr = PMOV : (pregidx, bits8, pregidx, bits8, bits8, bool)
 
 // MOVI: Load immediate value into DestReg.
-// Fields: (dest_reg, dest_offset_bytes, immediate_value, size_bits)
-union clause pinstr = PMOVI : (pregidx, bits8, bits16, bits8)
+// Fields: (dest_reg, dest_offset_bytes, immediate_value, size_bits, clear_dest)
+union clause pinstr = PMOVI : (pregidx, bits8, bits16, bits8, bool)
 
 // EXT: Extract data from packet buffer at cursor-relative offset into DestReg.
 // Fields: (dest_reg, dest_offset_bits, source_offset_bits, size_bits, clear_dest)
@@ -53,40 +53,40 @@ union clause pinstr = PMOVI : (pregidx, bits8, bits16, bits8)
 union clause pinstr = PEXT : (pregidx, bits8, bits16, bits8, bool)
 
 // ADD: Unsigned addition of two register sub-fields.
-// Fields: (dest_reg, dest_offset_bits, src1_reg, src1_offset_bits, src2_reg, src2_offset_bits, size_bits)
-union clause pinstr = PADD : (pregidx, bits8, pregidx, bits8, pregidx, bits8, bits8)
+// Fields: (dest_reg, dest_offset_bits, src1_reg, src1_offset_bits, src2_reg, src2_offset_bits, size_bits, clear_dest)
+union clause pinstr = PADD : (pregidx, bits8, pregidx, bits8, pregidx, bits8, bits8, bool)
 
 // ADDI: Unsigned addition of register sub-field and immediate.
-// Fields: (dest_reg, src_reg, immediate_value, size_bits)
-union clause pinstr = PADDI : (pregidx, pregidx, bits16, bits8)
+// Fields: (dest_reg, src_reg, immediate_value, size_bits, clear_dest)
+union clause pinstr = PADDI : (pregidx, pregidx, bits16, bits8, bool)
 
 // SUB: Subtraction of two register sub-fields.
-// Fields: (dest_reg, dest_offset_bits, src1_reg, src1_offset_bits, src2_reg, src2_offset_bits, size_bits)
-union clause pinstr = PSUB : (pregidx, bits8, pregidx, bits8, pregidx, bits8, bits8)
+// Fields: (dest_reg, dest_offset_bits, src1_reg, src1_offset_bits, src2_reg, src2_offset_bits, size_bits, clear_dest)
+union clause pinstr = PSUB : (pregidx, bits8, pregidx, bits8, pregidx, bits8, bits8, bool)
 
 // SUBI: Subtraction of immediate from register sub-field.
-// Fields: (dest_reg, src_reg, immediate_value, size_bits)
-union clause pinstr = PSUBI : (pregidx, pregidx, bits16, bits8)
+// Fields: (dest_reg, src_reg, immediate_value, size_bits, clear_dest)
+union clause pinstr = PSUBI : (pregidx, pregidx, bits16, bits8, bool)
 
 // SUBII: Subtraction of register sub-field from immediate (reversed).
-// Fields: (dest_reg, immediate_value, src_reg, size_bits)
-union clause pinstr = PSUBII : (pregidx, bits16, pregidx, bits8)
+// Fields: (dest_reg, immediate_value, src_reg, size_bits, clear_dest)
+union clause pinstr = PSUBII : (pregidx, bits16, pregidx, bits8, bool)
 
 // AND: Bitwise AND of two register sub-fields.
-// Fields: (dest_reg, dest_offset_bits, src1_reg, src1_offset_bits, src2_reg, src2_offset_bits, size_bits)
-union clause pinstr = PAND : (pregidx, bits8, pregidx, bits8, pregidx, bits8, bits8)
+// Fields: (dest_reg, dest_offset_bits, src1_reg, src1_offset_bits, src2_reg, src2_offset_bits, size_bits, clear_dest)
+union clause pinstr = PAND : (pregidx, bits8, pregidx, bits8, pregidx, bits8, bits8, bool)
 
 // ANDI: Bitwise AND of register sub-field and immediate.
-// Fields: (dest_reg, src_reg, immediate_value, size_bits)
-union clause pinstr = PANDI : (pregidx, pregidx, bits16, bits8)
+// Fields: (dest_reg, src_reg, immediate_value, size_bits, clear_dest)
+union clause pinstr = PANDI : (pregidx, pregidx, bits16, bits8, bool)
 
 // OR: Bitwise OR of two register sub-fields.
-// Fields: (dest_reg, dest_offset_bits, src1_reg, src1_offset_bits, src2_reg, src2_offset_bits, size_bits)
-union clause pinstr = POR : (pregidx, bits8, pregidx, bits8, pregidx, bits8, bits8)
+// Fields: (dest_reg, dest_offset_bits, src1_reg, src1_offset_bits, src2_reg, src2_offset_bits, size_bits, clear_dest)
+union clause pinstr = POR : (pregidx, bits8, pregidx, bits8, pregidx, bits8, bits8, bool)
 
 // ORI: Bitwise OR of register sub-field and immediate.
-// Fields: (dest_reg, src_reg, immediate_value, size_bits)
-union clause pinstr = PORI : (pregidx, pregidx, bits16, bits8)
+// Fields: (dest_reg, src_reg, immediate_value, size_bits, clear_dest)
+union clause pinstr = PORI : (pregidx, pregidx, bits16, bits8, bool)
 
 // CMP: Compare two register sub-fields (subtract, set flags, discard result).
 // Fields: (src1_reg, src1_offset_bits, src2_reg, src2_offset_bits, size_bits)
@@ -102,13 +102,13 @@ union clause pinstr = PCMPIBI : (pregidx, bits8, bits16, bits8)
 
 // CNCTBY: Concatenate from two source registers (byte granularity).
 // Fields: (dest_reg, dest_offset_bytes, src1_reg, src1_offset_bytes, src1_size_bytes,
-//          src2_reg, src2_offset_bytes, src2_size_bytes)
-union clause pinstr = PCNCTBY : (pregidx, bits8, pregidx, bits8, bits8, pregidx, bits8, bits8)
+//          src2_reg, src2_offset_bytes, src2_size_bytes, clear_dest)
+union clause pinstr = PCNCTBY : (pregidx, bits8, pregidx, bits8, bits8, pregidx, bits8, bits8, bool)
 
 // CNCTBI: Concatenate from two source registers (bit granularity).
 // Fields: (dest_reg, dest_offset_bits, src1_reg, src1_offset_bits, src1_size_bits,
-//          src2_reg, src2_offset_bits, src2_size_bits)
-union clause pinstr = PCNCTBI : (pregidx, bits8, pregidx, bits8, bits8, pregidx, bits8, bits8)
+//          src2_reg, src2_offset_bits, src2_size_bits, clear_dest)
+union clause pinstr = PCNCTBI : (pregidx, bits8, pregidx, bits8, bits8, pregidx, bits8, bits8, bool)
 
 // BR: Branch to address if condition is met.
 // Fields: (condition, target_address)

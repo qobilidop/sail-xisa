@@ -49,9 +49,9 @@ function clause execute(PHALT(drop)) = {
 
 // MOV: DestReg[dest_offset + size - 1 : dest_offset] = SourceReg[src_offset + size - 1 : src_offset]
 // Bit-field copy between registers. Other bits in destination are preserved.
-function clause execute(PMOV(rd, dest_offset, rs, src_offset, size_bits)) = {
+function clause execute(PMOV(rd, dest_offset, rs, src_offset, size_bits, clear_dest)) = {
     let src_val = read_preg(rs);
-    let dst_val = read_preg(rd);
+    let dst_val : bits128 = if clear_dest then sail_zeros(128) else read_preg(rd);
     let doff : nat = unsigned(dest_offset);
     let soff : nat = unsigned(src_offset);
     let sz : nat = unsigned(size_bits);
@@ -63,8 +63,8 @@ function clause execute(PMOV(rd, dest_offset, rs, src_offset, size_bits)) = {
 
 // MOVI: DestReg[(dest_offset_bytes*8) + size_bits - 1 : (dest_offset_bytes*8)] = immediate[size_bits-1:0]
 // Load an immediate value (up to 16 bits) into a register at a byte-aligned offset.
-function clause execute(PMOVI(rd, dest_offset_bytes, immediate, size_bits)) = {
-    let dst_val = read_preg(rd);
+function clause execute(PMOVI(rd, dest_offset_bytes, immediate, size_bits, clear_dest)) = {
+    let dst_val : bits128 = if clear_dest then sail_zeros(128) else read_preg(rd);
     let doff : nat = unsigned(dest_offset_bytes) * 8;
     let sz : nat = unsigned(size_bits);
     let imm_128 : bits128 = sail_zero_extend(immediate, 128);
@@ -124,10 +124,10 @@ function clause execute(PEXT(rd, dest_offset, src_offset_bits, size_bits, clear_
 
 // ADD: DestReg[dest_off + sz - 1 : dest_off] = Src1Reg[s1_off...] + Src2Reg[s2_off...]
 // Unsigned 16-bit addition. Sets Z flag.
-function clause execute(PADD(rd, dest_offset, rs1, src1_offset, rs2, src2_offset, size_bits)) = {
+function clause execute(PADD(rd, dest_offset, rs1, src1_offset, rs2, src2_offset, size_bits, clear_dest)) = {
     let s1_val = read_preg(rs1);
     let s2_val = read_preg(rs2);
-    let dst_val = read_preg(rd);
+    let dst_val : bits128 = if clear_dest then sail_zeros(128) else read_preg(rd);
     let doff : nat = unsigned(dest_offset);
     let s1off : nat = unsigned(src1_offset);
     let s2off : nat = unsigned(src2_offset);
@@ -143,9 +143,9 @@ function clause execute(PADD(rd, dest_offset, rs1, src1_offset, rs2, src2_offset
 
 // ADDI: DestReg[sz - 1 : 0] = SrcReg[sz - 1 : 0] + ImmediateValue
 // Unsigned addition with immediate. Sets Z flag.
-function clause execute(PADDI(rd, rs, immediate, size_bits)) = {
+function clause execute(PADDI(rd, rs, immediate, size_bits, clear_dest)) = {
     let src_val = read_preg(rs);
-    let dst_val = read_preg(rd);
+    let dst_val : bits128 = if clear_dest then sail_zeros(128) else read_preg(rd);
     let sz : nat = unsigned(size_bits);
     let op1 = extract_bits(src_val, 0, sz);
     let op2 : bits128 = sail_zero_extend(immediate, 128);
@@ -158,10 +158,10 @@ function clause execute(PADDI(rd, rs, immediate, size_bits)) = {
 
 // SUB: DestReg[dest_off + sz - 1 : dest_off] = Src1Reg[s1_off...] - Src2Reg[s2_off...]
 // 16-bit subtraction. Sets Z and N flags.
-function clause execute(PSUB(rd, dest_offset, rs1, src1_offset, rs2, src2_offset, size_bits)) = {
+function clause execute(PSUB(rd, dest_offset, rs1, src1_offset, rs2, src2_offset, size_bits, clear_dest)) = {
     let s1_val = read_preg(rs1);
     let s2_val = read_preg(rs2);
-    let dst_val = read_preg(rd);
+    let dst_val : bits128 = if clear_dest then sail_zeros(128) else read_preg(rd);
     let doff : nat = unsigned(dest_offset);
     let s1off : nat = unsigned(src1_offset);
     let s2off : nat = unsigned(src2_offset);
@@ -177,9 +177,9 @@ function clause execute(PSUB(rd, dest_offset, rs1, src1_offset, rs2, src2_offset
 }
 
 // SUBI: DestReg[sz - 1 : 0] = SrcReg[sz - 1 : 0] - ImmediateValue
-function clause execute(PSUBI(rd, rs, immediate, size_bits)) = {
+function clause execute(PSUBI(rd, rs, immediate, size_bits, clear_dest)) = {
     let src_val = read_preg(rs);
-    let dst_val = read_preg(rd);
+    let dst_val : bits128 = if clear_dest then sail_zeros(128) else read_preg(rd);
     let sz : nat = unsigned(size_bits);
     let op1 = extract_bits(src_val, 0, sz);
     let op2 : bits128 = sail_zero_extend(immediate, 128);
@@ -192,9 +192,9 @@ function clause execute(PSUBI(rd, rs, immediate, size_bits)) = {
 }
 
 // SUBII: DestReg[sz - 1 : 0] = ImmediateValue - SrcReg[sz - 1 : 0]
-function clause execute(PSUBII(rd, immediate, rs, size_bits)) = {
+function clause execute(PSUBII(rd, immediate, rs, size_bits, clear_dest)) = {
     let src_val = read_preg(rs);
-    let dst_val = read_preg(rd);
+    let dst_val : bits128 = if clear_dest then sail_zeros(128) else read_preg(rd);
     let sz : nat = unsigned(size_bits);
     let op1 : bits128 = sail_zero_extend(immediate, 128);
     let op2 = extract_bits(src_val, 0, sz);
@@ -208,10 +208,10 @@ function clause execute(PSUBII(rd, immediate, rs, size_bits)) = {
 
 // AND: DestReg[dest_off + sz - 1 : dest_off] = Src1Reg[s1_off...] & Src2Reg[s2_off...]
 // Bitwise AND. Sets Z flag.
-function clause execute(PAND(rd, dest_offset, rs1, src1_offset, rs2, src2_offset, size_bits)) = {
+function clause execute(PAND(rd, dest_offset, rs1, src1_offset, rs2, src2_offset, size_bits, clear_dest)) = {
     let s1_val = read_preg(rs1);
     let s2_val = read_preg(rs2);
-    let dst_val = read_preg(rd);
+    let dst_val : bits128 = if clear_dest then sail_zeros(128) else read_preg(rd);
     let doff : nat = unsigned(dest_offset);
     let s1off : nat = unsigned(src1_offset);
     let s2off : nat = unsigned(src2_offset);
@@ -226,9 +226,9 @@ function clause execute(PAND(rd, dest_offset, rs1, src1_offset, rs2, src2_offset
 }
 
 // ANDI: DestReg[sz - 1 : 0] = SrcReg[sz - 1 : 0] & ImmediateValue
-function clause execute(PANDI(rd, rs, immediate, size_bits)) = {
+function clause execute(PANDI(rd, rs, immediate, size_bits, clear_dest)) = {
     let src_val = read_preg(rs);
-    let dst_val = read_preg(rd);
+    let dst_val : bits128 = if clear_dest then sail_zeros(128) else read_preg(rd);
     let sz : nat = unsigned(size_bits);
     let op1 = extract_bits(src_val, 0, sz);
     let op2 : bits128 = sail_zero_extend(immediate, 128);
@@ -241,10 +241,10 @@ function clause execute(PANDI(rd, rs, immediate, size_bits)) = {
 
 // OR: DestReg[dest_off + sz - 1 : dest_off] = Src1Reg[s1_off...] | Src2Reg[s2_off...]
 // Bitwise OR. Sets Z flag.
-function clause execute(POR(rd, dest_offset, rs1, src1_offset, rs2, src2_offset, size_bits)) = {
+function clause execute(POR(rd, dest_offset, rs1, src1_offset, rs2, src2_offset, size_bits, clear_dest)) = {
     let s1_val = read_preg(rs1);
     let s2_val = read_preg(rs2);
-    let dst_val = read_preg(rd);
+    let dst_val : bits128 = if clear_dest then sail_zeros(128) else read_preg(rd);
     let doff : nat = unsigned(dest_offset);
     let s1off : nat = unsigned(src1_offset);
     let s2off : nat = unsigned(src2_offset);
@@ -259,9 +259,9 @@ function clause execute(POR(rd, dest_offset, rs1, src1_offset, rs2, src2_offset,
 }
 
 // ORI: DestReg[sz - 1 : 0] = SrcReg[sz - 1 : 0] | ImmediateValue
-function clause execute(PORI(rd, rs, immediate, size_bits)) = {
+function clause execute(PORI(rd, rs, immediate, size_bits, clear_dest)) = {
     let src_val = read_preg(rs);
-    let dst_val = read_preg(rd);
+    let dst_val : bits128 = if clear_dest then sail_zeros(128) else read_preg(rd);
     let sz : nat = unsigned(size_bits);
     let op1 = extract_bits(src_val, 0, sz);
     let op2 : bits128 = sail_zero_extend(immediate, 128);
@@ -324,10 +324,11 @@ function clause execute(PCNCTBY(
     rs2,
     src2_offset_bytes,
     src2_size_bytes,
+    clear_dest,
 )) = {
     let s1_val = read_preg(rs1);
     let s2_val = read_preg(rs2);
-    let dst_val = read_preg(rd);
+    let dst_val : bits128 = if clear_dest then sail_zeros(128) else read_preg(rd);
     let doff : nat = unsigned(dest_offset_bytes) * 8;
     let s1off : nat = unsigned(src1_offset_bytes) * 8;
     let s1sz : nat = unsigned(src1_size_bytes) * 8;
@@ -352,10 +353,11 @@ function clause execute(PCNCTBI(
     rs2,
     src2_offset_bits,
     src2_size_bits,
+    clear_dest,
 )) = {
     let s1_val = read_preg(rs1);
     let s2_val = read_preg(rs2);
-    let dst_val = read_preg(rd);
+    let dst_val : bits128 = if clear_dest then sail_zeros(128) else read_preg(rd);
     let doff : nat = unsigned(dest_offset_bits);
     let s1off : nat = unsigned(src1_offset_bits);
     let s1sz : nat = unsigned(src1_size_bits);
