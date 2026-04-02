@@ -4,7 +4,7 @@
 val test_movi_halt : unit -> unit
 function test_movi_halt() = {
     parser_init();
-    parser_load_program([|PMOVI(PR0, 0x00, 0x0042, 0x08), PHALT(false)|]);
+    parser_load_program([|PMOVI(PR0, 0x00, 0x0042, 0x08, false), PHALT(false)|]);
 
     let result = parser_run();
 
@@ -19,9 +19,9 @@ function test_add_program() = {
     parser_init();
     parser_load_program(
         [|
-            PMOVI(PR0, 0x00, 0x000A, 0x08),
-            PMOVI(PR1, 0x00, 0x0014, 0x08),
-            PADD(PR2, 0x00, PR0, 0x00, PR1, 0x00, 0x08),
+            PMOVI(PR0, 0x00, 0x000A, 0x08, false),
+            PMOVI(PR1, 0x00, 0x0014, 0x08, false),
+            PADD(PR2, 0x00, PR0, 0x00, PR1, 0x00, 0x08, false),
             PHALT(false),
         |],
     );
@@ -48,13 +48,13 @@ function test_branch_program() = {
     //   7: HALT
     parser_load_program(
         [|
-            PMOVI(PR0, 0x00, 0x0005, 0x08),
-            PMOVI(PR1, 0x00, 0x0005, 0x08),
+            PMOVI(PR0, 0x00, 0x0005, 0x08, false),
+            PMOVI(PR1, 0x00, 0x0005, 0x08, false),
             PCMP(PR0, 0x00, PR1, 0x00, 0x08),
             PBR(PCC_EQ, 0x0006),
-            PMOVI(PR2, 0x00, 0x00FF, 0x08),
+            PMOVI(PR2, 0x00, 0x00FF, 0x08, false),
             PHALT(false),
-            PMOVI(PR2, 0x00, 0x00AA, 0x08),
+            PMOVI(PR2, 0x00, 0x00AA, 0x08, false),
             PHALT(false),
         |],
     );
@@ -81,13 +81,13 @@ function test_branch_not_taken_program() = {
     //   7: HALT
     parser_load_program(
         [|
-            PMOVI(PR0, 0x00, 0x0003, 0x08),
-            PMOVI(PR1, 0x00, 0x0005, 0x08),
+            PMOVI(PR0, 0x00, 0x0003, 0x08, false),
+            PMOVI(PR1, 0x00, 0x0005, 0x08, false),
             PCMP(PR0, 0x00, PR1, 0x00, 0x08),
             PBR(PCC_EQ, 0x0006),
-            PMOVI(PR2, 0x00, 0x00BB, 0x08),
+            PMOVI(PR2, 0x00, 0x00BB, 0x08, false),
             PHALT(false),
-            PMOVI(PR2, 0x00, 0x00CC, 0x08),
+            PMOVI(PR2, 0x00, 0x00CC, 0x08, false),
             PHALT(false),
         |],
     );
@@ -111,8 +111,8 @@ function test_loop_program() = {
     //   4: HALT
     parser_load_program(
         [|
-            PMOVI(PR0, 0x00, 0x0003, 0x08),
-            PSUBI(PR0, PR0, 0x0001, 0x08),
+            PMOVI(PR0, 0x00, 0x0003, 0x08, false),
+            PSUBI(PR0, PR0, 0x0001, 0x08, false),
             PCMPIBI(PR0, 0x00, 0x0000, 0x08),
             PBR(PCC_NEQ, 0x0001),
             PHALT(false),
@@ -129,7 +129,7 @@ function test_loop_program() = {
 val test_drop_program : unit -> unit
 function test_drop_program() = {
     parser_init();
-    parser_load_program([|PMOVI(PR0, 0x00, 0x0001, 0x08), PHALT(true)|]);
+    parser_load_program([|PMOVI(PR0, 0x00, 0x0001, 0x08, false), PHALT(true)|]);
 
     let result = parser_run();
 

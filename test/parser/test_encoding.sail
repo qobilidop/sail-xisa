@@ -50,7 +50,7 @@ function test_roundtrip_movl() = {
 val test_roundtrip_cnctby : unit -> unit
 function test_roundtrip_cnctby() = {
     // Widest instruction (49 field bits)
-    let instr = PCNCTBY(PR0, 0x00, PR1, 0x00, 0x04, PR2, 0x04, 0x04);
+    let instr = PCNCTBY(PR0, 0x00, PR1, 0x00, 0x04, PR2, 0x04, 0x04, false);
     let encoded = encode_pinstr(instr);
     let decoded = decode_pinstr(encoded);
     let re_encoded = encode_pinstr(decoded);
