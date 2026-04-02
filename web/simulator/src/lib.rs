@@ -8,5 +8,4 @@ pub mod encode;
 
 pub mod execute;
 
-// Modules added in later tasks:
-// pub mod assembler;
+pub mod assembler;
