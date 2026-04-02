@@ -1,0 +1,67 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #1a1a2e;
+  --surface: #16213e;
+  --border: #334155;
+  --text: #e2e8f0;
+  --text-dim: #94a3b8;
+  --accent: #38bdf8;
+  --accent-dim: #0ea5e9;
+  --changed: #fbbf24;
+  --error: #f87171;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --font-sans: system-ui, -apple-system, sans-serif;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-brand {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.nav-links { display: flex; gap: 1rem; }
+.nav-links a {
+  color: var(--text-dim);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+.nav-links a:hover { color: var(--text); }
+
+.landing {
+  max-width: 600px;
+  margin: 4rem auto;
+  text-align: center;
+}
+
+.landing h1 { font-size: 2.5rem; margin-bottom: 1rem; }
+.landing p { color: var(--text-dim); margin-bottom: 2rem; }
+
+.cta {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background: var(--accent);
+  color: var(--bg);
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: 600;
+}
+.cta:hover { background: var(--accent-dim); }
