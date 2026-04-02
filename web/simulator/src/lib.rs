@@ -6,6 +6,7 @@ pub mod decode;
 
 pub mod encode;
 
+pub mod execute;
+
 // Modules added in later tasks:
-// pub mod execute;
 // pub mod assembler;
