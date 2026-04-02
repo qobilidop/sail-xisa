@@ -15,20 +15,20 @@
 
   const examples: Record<string, string> = {
     'Simple Arithmetic': `; Simple arithmetic: add two numbers
-MOVI PR0, 10
-MOVI PR1, 25
+MOVI PR0, 10, 16
+MOVI PR1, 25, 16
 ADD PR2, PR0, PR1
 HALT`,
     'Branch Example': `; Countdown loop from 5 to 0
-MOVI PR0, 5
-MOVI PR1, 1
+MOVI PR0, 5, 8
+MOVI PR1, 1, 8
 loop:
 SUB PR0, PR0, PR1
-BNZ loop
+BR.NZ loop
 HALT`,
-    'Extract Packet': `; Extract a field from the packet header
-MOVI PR0, 0
-EXT.CD PR1, PR0, 8, 8
+    'Extract Packet': `; Extract first 8 bytes from packet header
+EXT.CD PR0, 0, 64
+EXT.CD PR1, 64, 64
 HALT`,
   };
 
