@@ -29,4 +29,31 @@ Tracks which XISA instructions are formally specified in Sail. Section numbers r
 
 ## MAP ISA (Section 4 of XISA spec)
 
-Not yet started. See Section 4.12 of the XISA white paper for the full instruction list (~54 instructions).
+| Spec Section | Instruction(s) | Status | Notes |
+|-------------|----------------|--------|-------|
+| 4.13.1 | ADD, ADDI | Done | .F, .SX, .SH supported |
+| 4.13.2 | SUB, SUBI | Done | .F, .SX, .SH supported |
+| 4.13.3 | MOD, MODI | Not started | Async, needs LFLAG |
+| 4.13.4 | CMP, CMPI | Done | Always sets Z, C |
+| 4.13.5 | AND, ANDI | Done | .F supported |
+| 4.13.6 | OR, ORI | Done | .F supported |
+| 4.13.7 | XOR, XORI | Done | .F supported |
+| 4.13.8 | NOT | Done | .F supported |
+| 4.13.9 | SHL, SHLI, SHR, SHRI | Not started | |
+| 4.13.10 | CONCAT | Not started | |
+| 4.13.11 | MOV, MOVI | Done | .CD supported |
+| 4.13.12 | FFI | Not started | |
+| 4.13.13 | LD, LDD, LDDI, LDH, LDS, LDSP, LDSPI | Not started | Needs RAM/PMEM model |
+| 4.13.14 | ST, STD, STDI, STH, STS, STSP, STSPI | Not started | Needs RAM/PMEM model |
+| 4.13.15 | JTL | Not started | |
+| 4.13.16 | CALL | Not started | |
+| 4.13.17 | RET | Not started | |
+| 4.13.18 | BR, BRI, BRBTST | Done | All 11 condition codes |
+| 4.13.19 | HASH | Not started | Needs LFLAG |
+| 4.13.20 | LKP, LKPLPM, LKPT, LKPTI | Not started | Needs LFLAG, TCAM model |
+| 4.13.21 | SYNC, SYNCALL | Not started | Needs LFLAG |
+| 4.13.22 | HALT | Done | |
+| 4.13.23-25 | CP/CHKSUM/SEND | Not started | Needs frame memory model |
+| 4.13.26-30 | COUNTER/METER/CAS/BW/DLB | Not started | Atomic operations |
+| 4.13.31-54 | Misc (LDRTC..MCDONE) | Not started | |
+| 4.13.51 | NOP | Done | |
