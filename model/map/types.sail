@@ -134,4 +134,41 @@ union clause minstr = MBRI : (mcond, bits16)
 // Fields: (bit_test_cond, src_reg, src_word, bit_offset, target16)
 union clause minstr = MBRBTST : (mbtcond, mregidx, mwordsel, bits(5), bits16)
 
+// SHL: Shift left. Dest[m:k] = Source1[i1:j1] << Source2[i2:j2]
+// Fields: (dest_reg, dest_word, src1_reg, src1_word, src1_offset, src1_size,
+//          src2_reg, src2_word, src2_offset, src2_size, set_flags, clear_dest)
+union clause minstr = MSHL : (mregidx, mwordsel, mregidx, mwordsel, bits(5), bits(5),
+                              mregidx, mwordsel, bits(5), bits(5), bool, bool)
+
+// SHLI: Shift left immediate.
+// Fields: (dest_reg, dest_word, src1_reg, src1_word, src1_offset, src1_size,
+//          shift_imm, set_flags, clear_dest)
+union clause minstr = MSHLI : (mregidx, mwordsel, mregidx, mwordsel, bits(5), bits(5),
+                               bits(5), bool, bool)
+
+// SHR: Shift right. Dest[m:0] = Source1[i1:j1] >> Source2[i2:j2]
+// Fields: same as SHL
+union clause minstr = MSHR : (mregidx, mwordsel, mregidx, mwordsel, bits(5), bits(5),
+                              mregidx, mwordsel, bits(5), bits(5), bool, bool)
+
+// SHRI: Shift right immediate.
+// Fields: same as SHLI
+union clause minstr = MSHRI : (mregidx, mwordsel, mregidx, mwordsel, bits(5), bits(5),
+                               bits(5), bool, bool)
+
+// CONCAT: Bitwise concatenation.
+// DestReg[m:k] = (Src2[i2:j2] << Src1Size) | Src1[i1:j1]
+// Fields: (dest_reg, dest_word, dest_offset, src1_reg, src1_word, src1_offset, src1_size,
+//          src2_reg, src2_word, src2_offset, src2_size, clear_dest)
+union clause minstr = MCONCAT : (mregidx, mwordsel, bits(5), mregidx, mwordsel, bits(5), bits(5),
+                                 mregidx, mwordsel, bits(5), bits(5), bool)
+
+// FFI: Find first non-zero field.
+// Fields: (dest_reg, dest_word, value_reg, value_word, offset_reg, offset_word,
+//          field_size_imm, scan_direction_imm)
+// field_size_imm: 0=1bit, 1=2bit, 2=3bit, 3=4bit
+// scan_direction_imm: 0=MSb to LSb, 1=LSb to MSb
+union clause minstr = MFFI : (mregidx, mwordsel, mregidx, mwordsel, mregidx, mwordsel,
+                              bits(2), bool)
+
 end minstr

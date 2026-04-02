@@ -118,6 +118,30 @@ mapping clause mencdec = MBRI(cc, offset16)
 mapping clause mencdec = MBRBTST(btcc, rs, sw, boff, target16)
     <-> 0b010011 @ encdec_mbtcond(btcc) @ encdec_mregidx(rs) @ encdec_mwordsel(sw) @ boff @ target16 @ 0b00 : bits(2) @ 0x0000000 : bits(28)
 
+// Opcode 20: SHL (rd4+rw2+rs14+sw12+s1off5+s1sz5+rs24+sw22+s2off5+s2sz5+f1+cd1 = 40, pad 18)
+mapping clause mencdec = MSHL(rd, rw, rs1, sw1, s1off, s1sz, rs2, sw2, s2off, s2sz, f, cd)
+    <-> 0b010100 @ encdec_mregidx(rd) @ encdec_mwordsel(rw) @ encdec_mregidx(rs1) @ encdec_mwordsel(sw1) @ s1off @ s1sz @ encdec_mregidx(rs2) @ encdec_mwordsel(sw2) @ s2off @ s2sz @ encdec_mbool(f) @ encdec_mbool(cd) @ 0b00 : bits(2) @ 0x0000 : bits(16)
+
+// Opcode 21: SHLI (rd4+rw2+rs14+sw12+s1off5+s1sz5+imm5+f1+cd1 = 29, pad 29)
+mapping clause mencdec = MSHLI(rd, rw, rs1, sw1, s1off, s1sz, imm5, f, cd)
+    <-> 0b010101 @ encdec_mregidx(rd) @ encdec_mwordsel(rw) @ encdec_mregidx(rs1) @ encdec_mwordsel(sw1) @ s1off @ s1sz @ imm5 @ encdec_mbool(f) @ encdec_mbool(cd) @ 0b0 : bits(1) @ 0x0000000 : bits(28)
+
+// Opcode 22: SHR (same layout as SHL = 40, pad 18)
+mapping clause mencdec = MSHR(rd, rw, rs1, sw1, s1off, s1sz, rs2, sw2, s2off, s2sz, f, cd)
+    <-> 0b010110 @ encdec_mregidx(rd) @ encdec_mwordsel(rw) @ encdec_mregidx(rs1) @ encdec_mwordsel(sw1) @ s1off @ s1sz @ encdec_mregidx(rs2) @ encdec_mwordsel(sw2) @ s2off @ s2sz @ encdec_mbool(f) @ encdec_mbool(cd) @ 0b00 : bits(2) @ 0x0000 : bits(16)
+
+// Opcode 23: SHRI (same layout as SHLI = 29, pad 29)
+mapping clause mencdec = MSHRI(rd, rw, rs1, sw1, s1off, s1sz, imm5, f, cd)
+    <-> 0b010111 @ encdec_mregidx(rd) @ encdec_mwordsel(rw) @ encdec_mregidx(rs1) @ encdec_mwordsel(sw1) @ s1off @ s1sz @ imm5 @ encdec_mbool(f) @ encdec_mbool(cd) @ 0b0 : bits(1) @ 0x0000000 : bits(28)
+
+// Opcode 24: CONCAT (rd4+rw2+doff5+rs14+sw12+s1off5+s1sz5+rs24+sw22+s2off5+s2sz5+cd1 = 44, pad 14)
+mapping clause mencdec = MCONCAT(rd, rw, doff, rs1, sw1, s1off, s1sz, rs2, sw2, s2off, s2sz, cd)
+    <-> 0b011000 @ encdec_mregidx(rd) @ encdec_mwordsel(rw) @ doff @ encdec_mregidx(rs1) @ encdec_mwordsel(sw1) @ s1off @ s1sz @ encdec_mregidx(rs2) @ encdec_mwordsel(sw2) @ s2off @ s2sz @ encdec_mbool(cd) @ 0b00 : bits(2) @ 0x000 : bits(12)
+
+// Opcode 25: FFI (rd4+rw2+vr4+vw2+or4+ow2+fsz2+dir1 = 21, pad 37)
+mapping clause mencdec = MFFI(rd, rw, vr, vw, ore, ow, fsz, dir)
+    <-> 0b011001 @ encdec_mregidx(rd) @ encdec_mwordsel(rw) @ encdec_mregidx(vr) @ encdec_mwordsel(vw) @ encdec_mregidx(ore) @ encdec_mwordsel(ow) @ fsz @ encdec_mbool(dir) @ 0b0 : bits(1) @ 0x000000000 : bits(36)
+
 end mencdec
 
 // Encode a minstr to bits(64).
