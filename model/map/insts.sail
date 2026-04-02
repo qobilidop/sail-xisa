@@ -144,3 +144,60 @@ function clause mexecute(MADDI(rd, rw, rs1, sw1, s1off, s1sz, imm16,
     map_write_result(rd_idx, rw_idx, result, short_mode);
     RETIRE_SUCCESS
 }
+
+// SUB: Dest[N:0] = Source1[i1:j1] - Source2[i2:j2]
+function clause mexecute(MSUB(rd, rw, rs1, sw1, s1off, s1sz, rs2, sw2, s2off, s2sz,
+                              set_flags, sign_extend, short_mode)) = {
+    let rd_idx = mregidx_to_nat(rd);
+    let rw_idx = mwordsel_to_nat(rw);
+    let w1 = read_mapword(mregidx_to_nat(rs1), mwordsel_to_nat(sw1));
+    let w2 = read_mapword(mregidx_to_nat(rs2), mwordsel_to_nat(sw2));
+    let op1 : bits(32) = if sign_extend then map_extract_sx(w1, unsigned(s1off), unsigned(s1sz))
+                          else map_extract(w1, unsigned(s1off), unsigned(s1sz));
+    let op2 : bits(32) = if sign_extend then map_extract_sx(w2, unsigned(s2off), unsigned(s2sz))
+                          else map_extract(w2, unsigned(s2off), unsigned(s2sz));
+    let mask : bits(32) = if short_mode then 0x0000FFFF else 0xFFFFFFFF;
+    let result : bits(32) = sub_bits(op1, op2) & mask;
+    if set_flags then map_set_flags_sub(op1, op2, result, short_mode);
+    map_write_result(rd_idx, rw_idx, result, short_mode);
+    RETIRE_SUCCESS
+}
+
+// SUBI: Dest[N:0] = Source1[i1:j1] - ImmediateValue
+function clause mexecute(MSUBI(rd, rw, rs1, sw1, s1off, s1sz, imm16,
+                               set_flags, sign_extend, short_mode)) = {
+    let rd_idx = mregidx_to_nat(rd);
+    let rw_idx = mwordsel_to_nat(rw);
+    let w1 = read_mapword(mregidx_to_nat(rs1), mwordsel_to_nat(sw1));
+    let op1 : bits(32) = if sign_extend then map_extract_sx(w1, unsigned(s1off), unsigned(s1sz))
+                          else map_extract(w1, unsigned(s1off), unsigned(s1sz));
+    let op2 : bits(32) = sail_zero_extend(imm16, 32);
+    let mask : bits(32) = if short_mode then 0x0000FFFF else 0xFFFFFFFF;
+    let result : bits(32) = sub_bits(op1, op2) & mask;
+    if set_flags then map_set_flags_sub(op1, op2, result, short_mode);
+    map_write_result(rd_idx, rw_idx, result, short_mode);
+    RETIRE_SUCCESS
+}
+
+// CMP: Compare. Always sets Z and C flags. Result discarded.
+function clause mexecute(MCMP(rs1, sw1, s1off, rs2, sw2, s2off, sz)) = {
+    let w1 = read_mapword(mregidx_to_nat(rs1), mwordsel_to_nat(sw1));
+    let w2 = read_mapword(mregidx_to_nat(rs2), mwordsel_to_nat(sw2));
+    let op1 = map_extract(w1, unsigned(s1off), unsigned(sz));
+    let op2 = map_extract(w2, unsigned(s2off), unsigned(sz));
+    let result : bits(32) = sub_bits(op1, op2);
+    mflag_z = result == 0x00000000;
+    mflag_c = unsigned(op1) < unsigned(op2);
+    RETIRE_SUCCESS
+}
+
+// CMPI: Compare with immediate. Always sets Z and C flags.
+function clause mexecute(MCMPI(rs1, sw1, s1off, imm16, sz)) = {
+    let w1 = read_mapword(mregidx_to_nat(rs1), mwordsel_to_nat(sw1));
+    let op1 = map_extract(w1, unsigned(s1off), unsigned(sz));
+    let op2 : bits(32) = sail_zero_extend(imm16, 32);
+    let result : bits(32) = sub_bits(op1, op2);
+    mflag_z = result == 0x00000000;
+    mflag_c = unsigned(op1) < unsigned(op2);
+    RETIRE_SUCCESS
+}
