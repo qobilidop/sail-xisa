@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/qobilidop/sail-xisa/actions/workflows/ci.yml/badge.svg)](https://github.com/qobilidop/sail-xisa/actions/workflows/ci.yml)
 [![Build Dev Container](https://github.com/qobilidop/sail-xisa/actions/workflows/build-devcontainer.yml/badge.svg)](https://github.com/qobilidop/sail-xisa/actions/workflows/build-devcontainer.yml)
+[![Web Playground](https://github.com/qobilidop/sail-xisa/actions/workflows/web.yml/badge.svg)](https://github.com/qobilidop/sail-xisa/actions/workflows/web.yml)
 
 A formal specification of [XISA](https://xsightlabs.com/switches/xisa) (Xsight Labs' X-Switch Instruction Set Architecture) written in [Sail](https://github.com/rems-project/sail). See the public [white paper](https://cdn.sanity.io/files/eqivwe42/production/affd0d0005566d4d8c50e05eff7fb60a43049a9f.pdf) for the XISA reference.
 
