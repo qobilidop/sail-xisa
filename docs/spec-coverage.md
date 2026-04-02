@@ -39,10 +39,10 @@ Tracks which XISA instructions are formally specified in Sail. Section numbers r
 | 4.13.6 | OR, ORI | Done | .F supported |
 | 4.13.7 | XOR, XORI | Done | .F supported |
 | 4.13.8 | NOT | Done | .F supported |
-| 4.13.9 | SHL, SHLI, SHR, SHRI | Not started | |
-| 4.13.10 | CONCAT | Not started | |
+| 4.13.9 | SHL, SHLI, SHR, SHRI | Done | 4B mode. .F, .CD supported |
+| 4.13.10 | CONCAT | Done | .CD supported |
 | 4.13.11 | MOV, MOVI | Done | .CD supported |
-| 4.13.12 | FFI | Not started | |
+| 4.13.12 | FFI | Done | .F supported |
 | 4.13.13 | LD, LDD, LDDI, LDH, LDS, LDSP, LDSPI | Not started | Needs RAM/PMEM model |
 | 4.13.14 | ST, STD, STDI, STH, STS, STSP, STSPI | Not started | Needs RAM/PMEM model |
 | 4.13.15 | JTL | Not started | |
