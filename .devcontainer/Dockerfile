@@ -6,6 +6,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
     opam gcc make cmake pkg-config \
     libgmp-dev zlib1g-dev z3 \
+    curl ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 # Initialize opam (OCaml package manager)
