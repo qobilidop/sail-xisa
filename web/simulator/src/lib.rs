@@ -4,7 +4,8 @@ pub mod state;
 
 pub mod decode;
 
+pub mod encode;
+
 // Modules added in later tasks:
-// pub mod encode;
 // pub mod execute;
 // pub mod assembler;
