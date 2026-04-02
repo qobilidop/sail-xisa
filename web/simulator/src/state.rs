@@ -1,9 +1,8 @@
-use serde::Serialize;
-
 use crate::types::Reg;
 
 /// Complete simulator state. Mirrors `model/parser/state.sail`.
-#[derive(Debug, Clone, Serialize)]
+/// Not directly serializable (64-element arrays); use StateSnapshot in lib.rs for WASM.
+#[derive(Debug, Clone)]
 pub struct SimState {
     pub pc: u16,
     pub regs: [u128; 5],            // PR0-PR3 + PRN slot (PRN writes discarded)
