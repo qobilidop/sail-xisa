@@ -201,3 +201,102 @@ function clause mexecute(MCMPI(rs1, sw1, s1off, imm16, sz)) = {
     mflag_c = unsigned(op1) < unsigned(op2);
     RETIRE_SUCCESS
 }
+
+// AND: Dest[Size-1:0] = Src1[i1:j1] & Src2[i2:j2]
+function clause mexecute(MAND(rd, rw, rs1, sw1, s1off, rs2, sw2, s2off, sz, set_flags)) = {
+    let rd_idx = mregidx_to_nat(rd);
+    let rw_idx = mwordsel_to_nat(rw);
+    let op1 = map_extract(read_mapword(mregidx_to_nat(rs1), mwordsel_to_nat(sw1)), unsigned(s1off), unsigned(sz));
+    let op2 = map_extract(read_mapword(mregidx_to_nat(rs2), mwordsel_to_nat(sw2)), unsigned(s2off), unsigned(sz));
+    let result : bits(32) = op1 & op2;
+    if set_flags then map_set_flags_logic(result);
+    let existing = read_mapword(rd_idx, rw_idx);
+    let mask : bits(32) = sail_mask(32, sail_ones(unsigned(sz)));
+    write_mapword(rd_idx, rw_idx, (existing & not_vec(mask)) | result);
+    RETIRE_SUCCESS
+}
+
+// ANDI: Dest[Size-1:0] = Src1[i1:j1] & ImmediateValue
+function clause mexecute(MANDI(rd, rw, rs1, sw1, s1off, imm16, sz, set_flags)) = {
+    let rd_idx = mregidx_to_nat(rd);
+    let rw_idx = mwordsel_to_nat(rw);
+    let op1 = map_extract(read_mapword(mregidx_to_nat(rs1), mwordsel_to_nat(sw1)), unsigned(s1off), unsigned(sz));
+    let op2 : bits(32) = sail_zero_extend(imm16, 32);
+    let result : bits(32) = op1 & op2;
+    if set_flags then map_set_flags_logic(result);
+    let existing = read_mapword(rd_idx, rw_idx);
+    let mask : bits(32) = sail_mask(32, sail_ones(unsigned(sz)));
+    write_mapword(rd_idx, rw_idx, (existing & not_vec(mask)) | result);
+    RETIRE_SUCCESS
+}
+
+// OR: Dest[Size-1:0] = Src1[i1:j1] | Src2[i2:j2]
+function clause mexecute(MOR(rd, rw, rs1, sw1, s1off, rs2, sw2, s2off, sz, set_flags)) = {
+    let rd_idx = mregidx_to_nat(rd);
+    let rw_idx = mwordsel_to_nat(rw);
+    let op1 = map_extract(read_mapword(mregidx_to_nat(rs1), mwordsel_to_nat(sw1)), unsigned(s1off), unsigned(sz));
+    let op2 = map_extract(read_mapword(mregidx_to_nat(rs2), mwordsel_to_nat(sw2)), unsigned(s2off), unsigned(sz));
+    let result : bits(32) = op1 | op2;
+    if set_flags then map_set_flags_logic(result);
+    let existing = read_mapword(rd_idx, rw_idx);
+    let mask : bits(32) = sail_mask(32, sail_ones(unsigned(sz)));
+    write_mapword(rd_idx, rw_idx, (existing & not_vec(mask)) | result);
+    RETIRE_SUCCESS
+}
+
+// ORI: Dest[Size-1:0] = Src1[i1:j1] | ImmediateValue
+function clause mexecute(MORI(rd, rw, rs1, sw1, s1off, imm16, sz, set_flags)) = {
+    let rd_idx = mregidx_to_nat(rd);
+    let rw_idx = mwordsel_to_nat(rw);
+    let op1 = map_extract(read_mapword(mregidx_to_nat(rs1), mwordsel_to_nat(sw1)), unsigned(s1off), unsigned(sz));
+    let op2 : bits(32) = sail_zero_extend(imm16, 32);
+    let result : bits(32) = op1 | op2;
+    if set_flags then map_set_flags_logic(result);
+    let existing = read_mapword(rd_idx, rw_idx);
+    let mask : bits(32) = sail_mask(32, sail_ones(unsigned(sz)));
+    write_mapword(rd_idx, rw_idx, (existing & not_vec(mask)) | result);
+    RETIRE_SUCCESS
+}
+
+// XOR: Dest[Size-1:0] = Src1[i1:j1] ^ Src2[i2:j2]
+function clause mexecute(MXOR(rd, rw, rs1, sw1, s1off, rs2, sw2, s2off, sz, set_flags)) = {
+    let rd_idx = mregidx_to_nat(rd);
+    let rw_idx = mwordsel_to_nat(rw);
+    let op1 = map_extract(read_mapword(mregidx_to_nat(rs1), mwordsel_to_nat(sw1)), unsigned(s1off), unsigned(sz));
+    let op2 = map_extract(read_mapword(mregidx_to_nat(rs2), mwordsel_to_nat(sw2)), unsigned(s2off), unsigned(sz));
+    let result : bits(32) = xor_vec(op1, op2);
+    if set_flags then map_set_flags_logic(result);
+    let existing = read_mapword(rd_idx, rw_idx);
+    let mask : bits(32) = sail_mask(32, sail_ones(unsigned(sz)));
+    write_mapword(rd_idx, rw_idx, (existing & not_vec(mask)) | result);
+    RETIRE_SUCCESS
+}
+
+// XORI: Dest[Size-1:0] = Src1[i1:j1] ^ ImmediateValue
+function clause mexecute(MXORI(rd, rw, rs1, sw1, s1off, imm16, sz, set_flags)) = {
+    let rd_idx = mregidx_to_nat(rd);
+    let rw_idx = mwordsel_to_nat(rw);
+    let op1 = map_extract(read_mapword(mregidx_to_nat(rs1), mwordsel_to_nat(sw1)), unsigned(s1off), unsigned(sz));
+    let op2 : bits(32) = sail_zero_extend(imm16, 32);
+    let result : bits(32) = xor_vec(op1, op2);
+    if set_flags then map_set_flags_logic(result);
+    let existing = read_mapword(rd_idx, rw_idx);
+    let mask : bits(32) = sail_mask(32, sail_ones(unsigned(sz)));
+    write_mapword(rd_idx, rw_idx, (existing & not_vec(mask)) | result);
+    RETIRE_SUCCESS
+}
+
+// NOT: Dest[Size-1:0] = ~Src[i:j]
+function clause mexecute(MNOT(rd, rw, rs, sw, soff, sz, set_flags)) = {
+    let rd_idx = mregidx_to_nat(rd);
+    let rw_idx = mwordsel_to_nat(rw);
+    let op1 = map_extract(read_mapword(mregidx_to_nat(rs), mwordsel_to_nat(sw)), unsigned(soff), unsigned(sz));
+    let result : bits(32) = not_vec(op1) & sail_mask(32, sail_ones(unsigned(sz)));
+    if set_flags then map_set_flags_logic(result);
+    let existing = read_mapword(rd_idx, rw_idx);
+    let mask : bits(32) = sail_mask(32, sail_ones(unsigned(sz)));
+    write_mapword(rd_idx, rw_idx, (existing & not_vec(mask)) | result);
+    RETIRE_SUCCESS
+}
+
+end mexecute
