@@ -2,8 +2,6 @@
 
 ## Current
 
-- **.CD modifier not modeled for some instructions**: The .CD (clear destination) optional modifier is not yet supported for MOV, MOVI, ADD, SUB, AND, OR, or CNCT instructions. It should clear the destination register before writing. .CD is supported on EXT, EXTNXTP, and MOVL/MOVR variants.
-
 - **HALT simplifications**: The HALT instruction does not model the `.RP` (reparse) modifier, the optional MAP-PC entry point, or the optional PARSER-PC jump address. These require modeling the MAP thread handoff and reparse flow.
 
 - **EXT simplifications**: The EXT instruction does not model the `.PR` (present bit), `.SCSM` (start checksum), or `.ECSM` (end checksum) modifiers. These require the checksum accelerator and HDR.PRESENT models.
@@ -19,3 +17,5 @@
 - **Instruction encoding**: 64-bit binary encoding implemented with `encdec` mapping in `decode.sail`. Instruction memory expanded to 65536 slots.
 
 - **Instruction memory size**: Expanded from 256 to 65536 slots (matching bits16 PC width).
+
+- **.CD modifier complete**: The .CD (clear destination) modifier is now supported on all applicable instructions: MOV, MOVI, EXT, EXTNXTP, ADD, ADDI, SUB, SUBI, SUBII, AND, ANDI, OR, ORI, CNCTBY, CNCTBI, MOVL, MOVLI, MOVLII, MOVR, MOVRI, MOVRII.

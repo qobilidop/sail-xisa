@@ -11,17 +11,17 @@ Tracks which XISA instructions are formally specified in Sail. Section numbers r
 | 3.12.3 | EXT, EXTNXTP | Done | .CD supported. No .PR, .SCSM, .ECSM yet |
 | 3.12.4 | EXTMAP | Done | No .PR, .SCSM, .ECSM yet |
 | 3.12.5 | MOVMAP | Done | No .HDR modifier yet |
-| 3.12.6 | CNCTBY, CNCTBI | Done | |
+| 3.12.6 | CNCTBY, CNCTBI | Done | .CD supported |
 | 3.12.7 | STH | Done | .H supported. No JumpMode, .SCSM, .ECSM yet |
 | 3.12.8 | STC, STCI | Done | No JumpMode, .SCSM, .ECSM yet |
 | 3.12.9 | STCH, STHC | Done | .H supported (STCH). No JumpMode, .SCSM, .ECSM yet |
 | 3.12.10 | ST, STI | Done | .H supported (ST). HW bits 6-31 restriction not enforced |
-| 3.12.11 | MOV, MOVI | Done | No .CD modifier yet |
+| 3.12.11 | MOV, MOVI | Done | .CD supported |
 | 3.12.12 | MOVL, MOVLI, MOVLII, MOVR, MOVRI, MOVRII | Done | .CD supported |
-| 3.12.13 | ADD, ADDI | Done | No .CD modifier |
-| 3.12.14 | SUB, SUBI, SUBII | Done | No .CD modifier |
-| 3.12.15 | AND, ANDI | Done | No .CD modifier |
-| 3.12.16 | OR, ORI | Done | No .CD modifier |
+| 3.12.13 | ADD, ADDI | Done | .CD supported |
+| 3.12.14 | SUB, SUBI, SUBII | Done | .CD supported |
+| 3.12.15 | AND, ANDI | Done | .CD supported |
+| 3.12.16 | OR, ORI | Done | .CD supported |
 | 3.12.17 | CMP, CMPIBY, CMPIBI | Done | |
 | 3.12.18 | BR, BRBTST, BRNS, BRNXTP, BRBTSTNXTP, BRBTSTNS | Done | JumpMode 100 (trap) deferred |
 | 3.12.19 | HALT, HALTDROP | Done | No .RP or MAP-PC support yet |
