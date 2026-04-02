@@ -22,4 +22,19 @@ RUN eval $(opam env --switch=5.1.0) && opam install sail --yes
 ENV PATH="/root/.opam/5.1.0/bin:${PATH}"
 ENV SAIL_DIR="/root/.opam/5.1.0/share/sail"
 
+# Rust toolchain (for WASM simulator)
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
+    && . /root/.cargo/env \
+    && rustup target add wasm32-unknown-unknown
+
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+# wasm-pack (builds Rust → WASM with JS bindings)
+RUN cargo install wasm-pack
+
+# Node.js 22 LTS (for Astro frontend)
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && apt-get install -y nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /workspace
