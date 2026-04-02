@@ -1,0 +1,13 @@
+; Simple Branch Example
+; Counts down from 5 and halts when reaching 0.
+;
+; PR0 = counter (starts at 5)
+; PR1 = decrement value (1)
+
+MOVI PR0, 5, 8          ; counter = 5
+MOVI PR1, 1, 8          ; decrement = 1
+
+; loop:
+SUB PR0, PR0, PR1       ; counter -= 1
+BR.NZ 2                 ; if counter != 0, jump back to SUB (PC=2)
+HALT

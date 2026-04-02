@@ -1,0 +1,18 @@
+; Extract IPv4 Header Fields
+; Assumes packet starts with an IPv4 header.
+;
+; PR0 = version (4 bits) + IHL (4 bits)
+; PR1 = total length (16 bits)
+; PR2 = source IP (32 bits)
+; PR3 = destination IP (32 bits)
+
+EXT.CD PR0, 0, 8        ; version + IHL (byte 0)
+EXT.CD PR1, 16, 16      ; total length (bytes 2-3)
+EXT.CD PR2, 96, 32      ; source IP (bytes 12-15)
+EXT.CD PR3, 128, 32     ; destination IP (bytes 16-19)
+
+; Set header present and advance cursor
+STH 0, 0                ; mark header 0 as present at offset 0
+STCI 20                  ; advance cursor by 20 bytes (standard IPv4 header)
+
+HALT
