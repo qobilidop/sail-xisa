@@ -154,7 +154,7 @@ function parser_init() = {
     pseek_table_init();
 
     // Reset MAP registers
-    MAP = init_map();
+    map_init();
 
     // Reset instruction memory (first 256 entries — sufficient for test programs)
     pimem_zero_range(0, 256)
