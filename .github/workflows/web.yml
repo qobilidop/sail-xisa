@@ -18,55 +18,36 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install OCaml and Sail
-        run: |
-          sudo apt-get update && sudo apt-get install -y opam libgmp-dev zlib1g-dev z3
-          opam init --disable-sandboxing --yes --bare
-          opam switch create 5.1.0 --yes
-          eval $(opam env --switch=5.1.0)
-          opam install sail --yes
-
-      - name: Generate Sail docs
-        run: |
-          eval $(opam env --switch=5.1.0)
-          bash scripts/generate-sail-doc.sh
-
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
+      - name: Login to GHCR
+        uses: docker/login-action@v3
         with:
-          targets: wasm32-unknown-unknown
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install wasm-pack
-        run: cargo install wasm-pack
-
-      - name: Rust tests
-        working-directory: web/simulator
-        run: cargo test
-
-      - name: Build WASM
-        working-directory: web/simulator
-        run: wasm-pack build --target web
-
-      - uses: actions/setup-node@v4
+      - name: Test web build
+        uses: devcontainers/ci@v0.3
         with:
-          node-version: 22
-
-      - name: Install dependencies
-        working-directory: web
-        run: npm ci
-
-      - name: Build site
-        working-directory: web
-        run: npx astro build
+          cacheFrom: ghcr.io/${{ github.repository }}/dev
+          push: never
+          runCmd: |
+            bash scripts/generate-sail-doc.sh
+            cd web/simulator && cargo test && wasm-pack build --target web && cd ../..
+            cd web && npm ci && npx astro build
 
   deploy:
     needs: test
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
+      contents: read
+      packages: read
       pages: write
       id-token: write
     environment:
@@ -75,42 +56,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install OCaml and Sail
-        run: |
-          sudo apt-get update && sudo apt-get install -y opam libgmp-dev zlib1g-dev z3
-          opam init --disable-sandboxing --yes --bare
-          opam switch create 5.1.0 --yes
-          eval $(opam env --switch=5.1.0)
-          opam install sail --yes
-
-      - name: Generate Sail docs
-        run: |
-          eval $(opam env --switch=5.1.0)
-          bash scripts/generate-sail-doc.sh
-
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
+      - name: Login to GHCR
+        uses: docker/login-action@v3
         with:
-          targets: wasm32-unknown-unknown
-
-      - name: Install wasm-pack
-        run: cargo install wasm-pack
-
-      - name: Build WASM
-        working-directory: web/simulator
-        run: wasm-pack build --target web
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Install dependencies
-        working-directory: web
-        run: npm ci
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build site
-        working-directory: web
-        run: npx astro build
+        uses: devcontainers/ci@v0.3
+        with:
+          cacheFrom: ghcr.io/${{ github.repository }}/dev
+          push: never
+          runCmd: |
+            bash scripts/generate-sail-doc.sh
+            cd web/simulator && wasm-pack build --target web && cd ../..
+            cd web && npm ci && npx astro build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
