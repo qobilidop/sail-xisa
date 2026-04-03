@@ -4,8 +4,8 @@ set -euo pipefail
 # Format all Sail source files, or check that they are formatted.
 #
 # Usage:
-#   tools/format.sh          # format in place
-#   tools/format.sh --check  # check formatting (exit 1 if unformatted)
+#   scripts/format.sh          # format in place
+#   scripts/format.sh --check  # check formatting (exit 1 if unformatted)
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
@@ -47,10 +47,10 @@ elif [ "$1" = "--check" ]; then
             echo "  $f"
         done
         echo ""
-        echo "Run 'tools/format.sh' to fix."
+        echo "Run 'scripts/format.sh' to fix."
         exit 1
     fi
 else
-    echo "Usage: tools/format.sh [--check]"
+    echo "Usage: scripts/format.sh [--check]"
     exit 1
 fi

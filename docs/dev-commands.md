@@ -42,10 +42,10 @@ devcontainer build --workspace-folder .
 
 ```bash
 # Format all Sail files
-./dev.sh tools/format.sh
+./dev.sh scripts/format.sh
 
 # Check formatting (CI mode — fails if files aren't formatted)
-./dev.sh tools/format.sh --check
+./dev.sh scripts/format.sh --check
 ```
 
 ## Interactive
