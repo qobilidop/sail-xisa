@@ -67,6 +67,12 @@
   color: var(--text-dim);
 }
 
+.spec-status {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  margin-bottom: 1rem;
+}
+
 .instruction-detail {
   margin-bottom: 2rem;
 }
