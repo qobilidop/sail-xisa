@@ -1,0 +1,156 @@
+---
+import Base from '../layouts/Base.astro';
+
+let doc: any = null;
+try {
+  const docModule = await import('../data/doc.json');
+  doc = docModule.default;
+} catch (e) {
+  // doc.json may not exist in local dev without running generate script
+}
+
+function getExecuteClause(patternId: string): string | null {
+  if (!doc) return null;
+  const clauses = doc.functions?.execute?.function;
+  if (!Array.isArray(clauses)) return null;
+  const clause = clauses.find((c: any) => c.pattern?.id === patternId);
+  return clause?.source ?? null;
+}
+
+function getMexecuteClause(patternId: string): string | null {
+  if (!doc) return null;
+  const clauses = doc.functions?.mexecute?.function;
+  if (!Array.isArray(clauses)) return null;
+  const clause = clauses.find((c: any) => c.pattern?.id === patternId);
+  return clause?.source ?? null;
+}
+---
+<Base title="Spec">
+  <link slot="head" rel="stylesheet" href={`${import.meta.env.BASE_URL}/styles/spec.css`} />
+  <div class="spec-page">
+    <h1>XISA Spec Coverage</h1>
+
+    <div class="spec-notice">
+      ISA specification content on this page is derived from the
+      <a href="https://cdn.sanity.io/files/eqivwe42/production/affd0d0005566d4d8c50e05eff7fb60a43049a9f.pdf">
+        Xsight Labs XISA specification
+      </a>, licensed under the
+      <a href="https://www.mozilla.org/en-US/MPL/2.0/">Mozilla Public License 2.0</a>.
+      Section numbers refer to the official white paper.
+    </div>
+
+    <h2>Parser ISA (Section 3)</h2>
+
+    <table class="spec-table">
+      <thead>
+        <tr><th>Section</th><th>Instruction(s)</th><th>Status</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>3.12.1</td><td>NXTP</td><td class="status-done">Done</td><td></td></tr>
+        <tr><td>3.12.2</td><td>PSEEK, PSEEKNXTP</td><td class="status-done">Done</td><td>No PSEEK_ERROR/trap, no .CD. Fixed hdr length per entry</td></tr>
+        <tr><td>3.12.3</td><td>EXT, EXTNXTP</td><td class="status-done">Done</td><td>.CD supported. No .PR, .SCSM, .ECSM yet</td></tr>
+        <tr><td>3.12.4</td><td>EXTMAP</td><td class="status-done">Done</td><td>No .PR, .SCSM, .ECSM yet</td></tr>
+        <tr><td>3.12.5</td><td>MOVMAP</td><td class="status-done">Done</td><td>No .HDR modifier yet</td></tr>
+        <tr><td>3.12.6</td><td>CNCTBY, CNCTBI</td><td class="status-done">Done</td><td>.CD supported</td></tr>
+        <tr><td>3.12.7</td><td>STH</td><td class="status-done">Done</td><td>.H supported. No JumpMode, .SCSM, .ECSM yet</td></tr>
+        <tr><td>3.12.8</td><td>STC, STCI</td><td class="status-done">Done</td><td>No JumpMode, .SCSM, .ECSM yet</td></tr>
+        <tr><td>3.12.9</td><td>STCH, STHC</td><td class="status-done">Done</td><td>.H supported (STCH). No JumpMode, .SCSM, .ECSM yet</td></tr>
+        <tr><td>3.12.10</td><td>ST, STI</td><td class="status-done">Done</td><td>.H supported (ST). HW bits 6-31 restriction not enforced</td></tr>
+        <tr><td>3.12.11</td><td>MOV, MOVI</td><td class="status-done">Done</td><td>.CD supported</td></tr>
+        <tr><td>3.12.12</td><td>MOVL, MOVLI, MOVLII, MOVR, MOVRI, MOVRII</td><td class="status-done">Done</td><td>.CD supported</td></tr>
+        <tr><td>3.12.13</td><td>ADD, ADDI</td><td class="status-done">Done</td><td>.CD supported</td></tr>
+        <tr><td>3.12.14</td><td>SUB, SUBI, SUBII</td><td class="status-done">Done</td><td>.CD supported</td></tr>
+        <tr><td>3.12.15</td><td>AND, ANDI</td><td class="status-done">Done</td><td>.CD supported</td></tr>
+        <tr><td>3.12.16</td><td>OR, ORI</td><td class="status-done">Done</td><td>.CD supported</td></tr>
+        <tr><td>3.12.17</td><td>CMP, CMPIBY, CMPIBI</td><td class="status-done">Done</td><td></td></tr>
+        <tr><td>3.12.18</td><td>BR, BRBTST, BRNS, BRNXTP, BRBTSTNXTP, BRBTSTNS</td><td class="status-done">Done</td><td>JumpMode 100 (trap) deferred</td></tr>
+        <tr><td>3.12.19</td><td>HALT, HALTDROP</td><td class="status-done">Done</td><td>No .RP or MAP-PC support yet</td></tr>
+        <tr><td>3.12.20</td><td>NOP</td><td class="status-done">Done</td><td></td></tr>
+      </tbody>
+    </table>
+
+    <h3>Parser Instruction Semantics</h3>
+
+    {[
+      ['PNOP'], ['PHALT'],
+      ['PMOV', 'PMOVI'],
+      ['PEXT', 'PEXTNXTP'],
+      ['PEXTMAP'], ['PMOVMAP'],
+      ['PCNCTBY', 'PCNCTBI'],
+      ['PSTH'], ['PSTC', 'PSTCI'], ['PSTCH', 'PSTHC'], ['PST', 'PSTI'],
+      ['PMOVL', 'PMOVLI', 'PMOVLII', 'PMOVR', 'PMOVRI', 'PMOVRII'],
+      ['PADD', 'PADDI'], ['PSUB', 'PSUBI', 'PSUBII'],
+      ['PAND', 'PANDI'], ['POR', 'PORI'],
+      ['PCMP', 'PCMPIBY', 'PCMPIBI'],
+      ['PBR', 'PBRBTST', 'PBRNS', 'PBRNXTP', 'PBRBTSTNXTP', 'PBRBTSTNS'],
+      ['PNXTP'],
+      ['PPSEEK', 'PPSEEKNXTP'],
+    ].map((group) => (
+      group.map((id) => {
+        const src = getExecuteClause(id);
+        return src ? <div class="sail-code" set:text={src} /> : null;
+      })
+    ))}
+
+    <h2>MAP ISA (Section 4)</h2>
+
+    <table class="spec-table">
+      <thead>
+        <tr><th>Section</th><th>Instruction(s)</th><th>Status</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>4.13.1</td><td>ADD, ADDI</td><td class="status-done">Done</td><td>.F, .SX, .SH supported</td></tr>
+        <tr><td>4.13.2</td><td>SUB, SUBI</td><td class="status-done">Done</td><td>.F, .SX, .SH supported</td></tr>
+        <tr><td>4.13.3</td><td>MOD, MODI</td><td class="status-not-started">Not started</td><td>Async, needs LFLAG</td></tr>
+        <tr><td>4.13.4</td><td>CMP, CMPI</td><td class="status-done">Done</td><td>Always sets Z, C</td></tr>
+        <tr><td>4.13.5</td><td>AND, ANDI</td><td class="status-done">Done</td><td>.F supported</td></tr>
+        <tr><td>4.13.6</td><td>OR, ORI</td><td class="status-done">Done</td><td>.F supported</td></tr>
+        <tr><td>4.13.7</td><td>XOR, XORI</td><td class="status-done">Done</td><td>.F supported</td></tr>
+        <tr><td>4.13.8</td><td>NOT</td><td class="status-done">Done</td><td>.F supported</td></tr>
+        <tr><td>4.13.9</td><td>SHL, SHLI, SHR, SHRI</td><td class="status-done">Done</td><td>4B mode. .F, .CD supported</td></tr>
+        <tr><td>4.13.10</td><td>CONCAT</td><td class="status-done">Done</td><td>.CD supported</td></tr>
+        <tr><td>4.13.11</td><td>MOV, MOVI</td><td class="status-done">Done</td><td>.CD supported</td></tr>
+        <tr><td>4.13.12</td><td>FFI</td><td class="status-done">Done</td><td>.F supported</td></tr>
+        <tr><td>4.13.13</td><td>LD, LDD, LDDI, LDH, LDS, LDSP, LDSPI</td><td class="status-not-started">Not started</td><td>Needs RAM/PMEM model</td></tr>
+        <tr><td>4.13.14</td><td>ST, STD, STDI, STH, STS, STSP, STSPI</td><td class="status-not-started">Not started</td><td>Needs RAM/PMEM model</td></tr>
+        <tr><td>4.13.15</td><td>JTL</td><td class="status-not-started">Not started</td><td></td></tr>
+        <tr><td>4.13.16</td><td>CALL</td><td class="status-not-started">Not started</td><td></td></tr>
+        <tr><td>4.13.17</td><td>RET</td><td class="status-not-started">Not started</td><td></td></tr>
+        <tr><td>4.13.18</td><td>BR, BRI, BRBTST</td><td class="status-done">Done</td><td>All 11 condition codes</td></tr>
+        <tr><td>4.13.19</td><td>HASH</td><td class="status-not-started">Not started</td><td>Needs LFLAG</td></tr>
+        <tr><td>4.13.20</td><td>LKP, LKPLPM, LKPT, LKPTI</td><td class="status-not-started">Not started</td><td>Needs LFLAG, TCAM model</td></tr>
+        <tr><td>4.13.21</td><td>SYNC, SYNCALL</td><td class="status-not-started">Not started</td><td>Needs LFLAG</td></tr>
+        <tr><td>4.13.22</td><td>HALT</td><td class="status-done">Done</td><td></td></tr>
+        <tr><td>4.13.23–25</td><td>CP/CHKSUM/SEND</td><td class="status-not-started">Not started</td><td>Needs frame memory model</td></tr>
+        <tr><td>4.13.26–30</td><td>COUNTER/METER/CAS/BW/DLB</td><td class="status-not-started">Not started</td><td>Atomic operations</td></tr>
+        <tr><td>4.13.31–54</td><td>Misc (LDRTC..MCDONE)</td><td class="status-not-started">Not started</td><td></td></tr>
+        <tr><td>4.13.51</td><td>NOP</td><td class="status-done">Done</td><td></td></tr>
+      </tbody>
+    </table>
+
+    <h3>MAP Instruction Semantics</h3>
+
+    {[
+      ['MNOP'], ['MHALT'],
+      ['MADD', 'MADDI'], ['MSUB', 'MSUBI'],
+      ['MCMP', 'MCMPI'],
+      ['MAND', 'MANDI'], ['MOR', 'MORI'], ['MXOR', 'MXORI'], ['MNOT'],
+      ['MSHL', 'MSHLI', 'MSHR', 'MSHRI'],
+      ['MCONCAT'],
+      ['MMOV', 'MMOVI'],
+      ['MFFI'],
+      ['MBR', 'MBRI', 'MBRBTST'],
+    ].map((group) => (
+      group.map((id) => {
+        const src = getMexecuteClause(id);
+        return src ? <div class="sail-code" set:text={src} /> : null;
+      })
+    ))}
+
+    <p style="margin-top: 2rem; color: var(--text-dim); font-size: 0.85rem;">
+      Sail semantics are auto-generated from the formal model. See the
+      <a href="https://github.com/qobilidop/sail-xisa" style="color: var(--accent);">source repository</a>
+      for the full model.
+    </p>
+  </div>
+</Base>

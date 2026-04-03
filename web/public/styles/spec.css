@@ -1,0 +1,82 @@
+.spec-page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.spec-notice {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 2rem;
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+
+.spec-notice a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.spec-notice a:hover {
+  text-decoration: underline;
+}
+
+.spec-page h2 {
+  font-size: 1.5rem;
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+  color: var(--text);
+}
+
+.spec-page h3 {
+  font-size: 1.1rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: var(--text);
+}
+
+.spec-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  margin-bottom: 1.5rem;
+}
+
+.spec-table th {
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
+.spec-table td {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+}
+
+.spec-table .status-done {
+  color: #4ade80;
+}
+
+.spec-table .status-not-started {
+  color: var(--text-dim);
+}
+
+.sail-code {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1rem;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--text);
+  margin: 0.5rem 0 1.5rem 0;
+  white-space: pre;
+}
