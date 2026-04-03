@@ -46,6 +46,16 @@ body {
 }
 .nav-links a:hover { color: var(--text); }
 
+.nav-spacer { flex: 1; }
+
+.nav-icon {
+  display: flex;
+  align-items: center;
+  opacity: 0.6;
+  transition: opacity 0.15s;
+}
+.nav-icon:hover { opacity: 1; }
+
 .landing {
   max-width: 600px;
   margin: 4rem auto;

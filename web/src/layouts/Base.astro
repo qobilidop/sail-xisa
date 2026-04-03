@@ -18,6 +18,10 @@ const { title } = Astro.props;
       <a href={`${import.meta.env.BASE_URL}/playground`}>Playground</a>
       <a href={`${import.meta.env.BASE_URL}/spec`}>Spec</a>
     </div>
+    <div class="nav-spacer"></div>
+    <a href="https://github.com/qobilidop/sail-xisa" class="nav-icon" title="GitHub">
+      <img src={`${import.meta.env.BASE_URL}/icons/github.svg`} alt="GitHub" width="20" height="20" />
+    </a>
   </nav>
   <main>
     <slot />
