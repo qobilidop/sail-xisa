@@ -2,3 +2,4 @@ node_modules/
 dist/
 .astro/
 simulator/target/
+src/data/doc.json
