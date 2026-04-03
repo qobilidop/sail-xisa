@@ -13,7 +13,7 @@ function test_ext_nibble_high() = {
     packet_hdr[0] = 0xAB;
     pcursor = 0x00;
 
-    let _ = execute(PEXT(PR0, 0x00, 0x0000, 0x04, true));
+    let _ = pexecute(PEXT(PR0, 0x00, 0x0000, 0x04, true));
 
     assert(PR[0] == 0x00000000_00000000_00000000_0000000A, "EXT: high nibble of 0xAB = 0xA")
 }
@@ -25,7 +25,7 @@ function test_ext_nibble_low() = {
     packet_hdr[0] = 0xAB;
     pcursor = 0x00;
 
-    let _ = execute(PEXT(PR0, 0x00, 0x0004, 0x04, true));
+    let _ = pexecute(PEXT(PR0, 0x00, 0x0004, 0x04, true));
 
     assert(PR[0] == 0x00000000_00000000_00000000_0000000B, "EXT: low nibble of 0xAB = 0xB")
 }
@@ -43,7 +43,7 @@ function test_ext_cross_byte_boundary() = {
 
     // Extract 8 bits at offset 4 (spans bytes 0 and 1)
     // Bits from MSB: skip 4, take 8 = 1011_1100 = 0xBC
-    let _ = execute(PEXT(PR0, 0x00, 0x0004, 0x08, true));
+    let _ = pexecute(PEXT(PR0, 0x00, 0x0004, 0x08, true));
 
     assert(PR[0] == 0x00000000_00000000_00000000_000000BC, "EXT: cross-byte extraction at offset 4 = 0xBC")
 }
@@ -60,7 +60,7 @@ function test_ext_12bit_cross_byte() = {
     pcursor = 0x00;
 
     // Extract 12 bits at offset 0: top 12 bits = 0xFFF
-    let _ = execute(PEXT(PR0, 0x00, 0x0000, 0x0C, true));
+    let _ = pexecute(PEXT(PR0, 0x00, 0x0000, 0x0C, true));
 
     assert(PR[0] == 0x00000000_00000000_00000000_00000FFF, "EXT: 12 bits at offset 0 from 0xFFF0 = 0xFFF")
 }
@@ -78,7 +78,7 @@ function test_ext_cursor_plus_offset() = {
 
     // Cursor at byte 2. Source offset 8 bits (1 byte) from cursor = byte 3.
     // Extract 16 bits starting at byte 3: 0xABCD
-    let _ = execute(PEXT(PR0, 0x00, 0x0008, 0x10, true));
+    let _ = pexecute(PEXT(PR0, 0x00, 0x0008, 0x10, true));
 
     assert(PR[0] == 0x00000000_00000000_00000000_0000ABCD, "EXT: cursor=2, offset=8bits, extract 16 bits = 0xABCD")
 }
@@ -91,7 +91,7 @@ function test_ext_single_bit_msb() = {
     pcursor = 0x00;
 
     // Offset 0, size 1: MSB of 0x80 = 1
-    let _ = execute(PEXT(PR0, 0x00, 0x0000, 0x01, true));
+    let _ = pexecute(PEXT(PR0, 0x00, 0x0000, 0x01, true));
 
     assert(PR[0] == 0x00000000_00000000_00000000_00000001, "EXT: single bit, MSB of 0x80 = 1")
 }
@@ -104,7 +104,7 @@ function test_ext_single_bit_lsb() = {
     pcursor = 0x00;
 
     // Offset 7, size 1: LSB of 0x80 = 0
-    let _ = execute(PEXT(PR1, 0x00, 0x0007, 0x01, true));
+    let _ = pexecute(PEXT(PR1, 0x00, 0x0007, 0x01, true));
 
     assert(PR[1] == 0x00000000_00000000_00000000_00000000, "EXT: single bit, LSB of 0x80 = 0")
 }
@@ -117,7 +117,7 @@ function test_ext_high_dest_offset() = {
     pcursor = 0x00;
 
     // Extract 8 bits, place at dest offset 120 (bits [127:120])
-    let _ = execute(PEXT(PR0, 0x78, 0x0000, 0x08, true));
+    let _ = pexecute(PEXT(PR0, 0x78, 0x0000, 0x08, true));
 
     assert(PR[0] == 0xAB000000_00000000_00000000_00000000, "EXT: place data at dest offset 120 (top byte)")
 }

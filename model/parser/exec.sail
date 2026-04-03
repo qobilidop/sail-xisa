@@ -9,7 +9,7 @@ function parser_step() = {
 
     // Advance PC before execute (branch instructions may overwrite it)
     ppc = ppc + 0x0001;
-    execute(instr)
+    pexecute(instr)
 }
 
 // Run the parser until HALT or DROP.

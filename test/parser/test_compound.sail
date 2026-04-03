@@ -8,7 +8,7 @@ function test_extnxtp_match() = {
     packet_hdr[1] = 0x00;
     write_transition_rule(0, 0x00, 0x000800, 0x0064, 0x01);
     // PEXTNXTP(dest_reg, source_offset_bits, size_bits, clear_dest)
-    let _ = execute(PEXTNXTP(PR0, 0x0000, 0x10, true));
+    let _ = pexecute(PEXTNXTP(PR0, 0x0000, 0x10, true));
     assert(PR[0] == 0x00000000_00000000_00000000_00000800,
         "EXTNXTP should extract 0x0800 into R0[15:0]");
     assert(nxtp_matched == true, "EXTNXTP should find a match");
@@ -22,7 +22,7 @@ function test_extnxtp_rn() = {
     packet_hdr[0] = 0x08;
     packet_hdr[1] = 0x00;
     write_transition_rule(0, 0x00, 0x000800, 0x0064, 0x01);
-    let _ = execute(PEXTNXTP(PRN, 0x0000, 0x10, true));
+    let _ = pexecute(PEXTNXTP(PRN, 0x0000, 0x10, true));
     // RN always reads as zero
     assert(read_preg(PRN) == sail_zeros(128),
         "EXTNXTP with RN should not modify any register");
@@ -36,12 +36,12 @@ function test_brbtstnxtp_taken() = {
     write_transition_rule(0, 0x00, 0x000800, 0x0064, 0x01);
     PR[0] = 0x00000000_00000000_00000000_00000800;
     // Set up NXTP result
-    let _ = execute(PNXTP(PR0, 0x00, 0x10));
+    let _ = pexecute(PNXTP(PR0, 0x00, 0x10));
     assert(nxtp_matched == true, "NXTP should match");
     // R1 with bit 0 set
     PR[1] = 0x00000000_00000000_00000000_00000001;
     // PBRBTSTNXTP(condition, src_reg, bit_offset, jump_mode, addr_or_rule)
-    let _ = execute(PBRBTSTNXTP(PBT_SET, PR1, 0x00, 0x00, 0x0000));
+    let _ = pexecute(PBRBTSTNXTP(PBT_SET, PR1, 0x00, 0x00, 0x0000));
     assert(ppc == 0x0064, "BRBTSTNXTP should branch to NXTP result PC");
     assert(parser_state == 0x01, "BRBTSTNXTP should update parser_state")
 }
@@ -53,10 +53,10 @@ function test_brbtstnxtp_not_taken() = {
     ppc = 0x0010;
     write_transition_rule(0, 0x00, 0x000800, 0x0064, 0x01);
     PR[0] = 0x00000000_00000000_00000000_00000800;
-    let _ = execute(PNXTP(PR0, 0x00, 0x10));
+    let _ = pexecute(PNXTP(PR0, 0x00, 0x10));
     // R1 with bit 0 clear
     PR[1] = 0x00000000_00000000_00000000_00000000;
-    let _ = execute(PBRBTSTNXTP(PBT_SET, PR1, 0x00, 0x00, 0x0000));
+    let _ = pexecute(PBRBTSTNXTP(PBT_SET, PR1, 0x00, 0x00, 0x0000));
     assert(ppc == 0x0010, "BRBTSTNXTP should not branch when bit is clear")
 }
 
@@ -68,7 +68,7 @@ function test_brbtstns_taken() = {
     // R0 with bit 4 set
     PR[0] = 0x00000000_00000000_00000000_00000010;
     // PBRBTSTNS(condition, src_reg, bit_offset, rule_number)
-    let _ = execute(PBRBTSTNS(PBT_SET, PR0, 0x04, 0x03));
+    let _ = pexecute(PBRBTSTNS(PBT_SET, PR0, 0x04, 0x03));
     assert(ppc == 0x0050, "BRBTSTNS should branch to rule 3's PC");
     assert(parser_state == 0x02, "BRBTSTNS should update parser_state to 2")
 }

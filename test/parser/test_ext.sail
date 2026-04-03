@@ -12,7 +12,7 @@ function test_ext_basic() = {
 
     // Cursor at 0, extract 16 bits (2 bytes) from packet offset 0 into R0 at offset 0
     pcursor = 0x00;
-    let _ = execute(PEXT(PR0, 0x00, 0x0000, 0x10, false));
+    let _ = pexecute(PEXT(PR0, 0x00, 0x0000, 0x10, false));
 
     // Bytes 0x01, 0x02 extracted big-endian: 0x0102 placed at R0[15:0]
     assert(PR[0] == 0x00000000_00000000_00000000_00000102, "EXT should extract 2 bytes from packet into register")
@@ -29,7 +29,7 @@ function test_ext_with_cursor_offset() = {
 
     // Cursor at byte 2, extract 8 bits from packet offset 0 (relative to cursor)
     pcursor = 0x02;
-    let _ = execute(PEXT(PR0, 0x00, 0x0000, 0x08, false));
+    let _ = pexecute(PEXT(PR0, 0x00, 0x0000, 0x08, false));
 
     assert(PR[0] == 0x00000000_00000000_00000000_000000CC, "EXT should extract relative to cursor position")
 }
@@ -45,7 +45,7 @@ function test_ext_with_source_offset() = {
 
     // Cursor at 0, extract 8 bits from source offset 16 bits (= 2 bytes from cursor)
     pcursor = 0x00;
-    let _ = execute(PEXT(PR0, 0x00, 0x0010, 0x08, false));
+    let _ = pexecute(PEXT(PR0, 0x00, 0x0010, 0x08, false));
 
     assert(PR[0] == 0x00000000_00000000_00000000_000000CC, "EXT should respect source offset from cursor")
 }
@@ -58,7 +58,7 @@ function test_ext_with_dest_offset() = {
 
     // Extract 8 bits from packet offset 0, place at dest offset 112 (near MSB)
     pcursor = 0x00;
-    let _ = execute(PEXT(PR0, 0x70, 0x0000, 0x08, false));
+    let _ = pexecute(PEXT(PR0, 0x70, 0x0000, 0x08, false));
 
     // R0[119:112] = 0xFF
     assert(PR[0] == 0x00FF0000_00000000_00000000_00000000, "EXT should place data at correct destination offset")
@@ -73,7 +73,7 @@ function test_ext_with_clear_dest() = {
 
     // EXT.CD: clear destination register before extraction
     pcursor = 0x00;
-    let _ = execute(PEXT(PR0, 0x00, 0x0000, 0x08, true));
+    let _ = pexecute(PEXT(PR0, 0x00, 0x0000, 0x08, true));
 
     assert(PR[0] == 0x00000000_00000000_00000000_000000AB, "EXT.CD should clear register then place extracted data")
 }
@@ -87,7 +87,7 @@ function test_ext_preserves_other_bits_without_cd() = {
 
     // EXT without .CD: other bits in R0 should be preserved
     pcursor = 0x00;
-    let _ = execute(PEXT(PR0, 0x00, 0x0000, 0x08, false));
+    let _ = pexecute(PEXT(PR0, 0x00, 0x0000, 0x08, false));
 
     assert(PR[0] == 0xFFFFFFFF_FFFFFFFF_FFFFFFFF_FFFFFFAB, "EXT without .CD should preserve other bits")
 }

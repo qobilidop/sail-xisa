@@ -9,7 +9,7 @@ function test_nop_does_not_change_registers() = {
     PR[2] = 0x55555555_66666666_77777777_88888888;
     PR[3] = 0x99999999_AABBCCDD_EEFF0011_22334455;
 
-    let result = execute(PNOP());
+    let result = pexecute(PNOP());
 
     assert(result == RETIRE_SUCCESS, "NOP should return RETIRE_SUCCESS");
     assert(PR[0] == 0xAAAAAAAA_BBBBBBBB_CCCCCCCC_DDDDDDDD, "NOP should not modify R0");
@@ -23,7 +23,7 @@ function test_nop_does_not_change_cursor() = {
     parser_init();
     pcursor = 0x42;
 
-    let _ = execute(PNOP());
+    let _ = pexecute(PNOP());
 
     assert(pcursor == 0x42, "NOP should not modify cursor")
 }
@@ -34,7 +34,7 @@ function test_nop_does_not_change_flags() = {
     pflag_z = true;
     pflag_n = true;
 
-    let _ = execute(PNOP());
+    let _ = pexecute(PNOP());
 
     assert(pflag_z == true, "NOP should not modify Z flag");
     assert(pflag_n == true, "NOP should not modify N flag")

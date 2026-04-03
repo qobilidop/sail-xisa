@@ -9,7 +9,7 @@ function test_nxtp_match() = {
     // Put key 0x0800 in R0[15:0]
     PR[0] = 0x00000000_00000000_00000000_00000800;
     // NXTP: extract 16 bits from R0 at offset 0
-    let _ = execute(PNXTP(PR0, 0x00, 0x10));
+    let _ = pexecute(PNXTP(PR0, 0x00, 0x10));
     assert(nxtp_matched == true, "NXTP should find a match");
     assert(nxtp_result_pc == 0x0064, "NXTP result PC should be 100");
     assert(nxtp_result_state == 0x01, "NXTP result state should be 1")
@@ -21,7 +21,7 @@ function test_nxtp_no_match() = {
     parser_init();
     write_transition_rule(0, 0x00, 0x000800, 0x0064, 0x01);
     PR[0] = 0x00000000_00000000_00000000_00009999;
-    let _ = execute(PNXTP(PR0, 0x00, 0x10));
+    let _ = pexecute(PNXTP(PR0, 0x00, 0x10));
     assert(nxtp_matched == false, "NXTP should not find a match")
 }
 
@@ -36,12 +36,12 @@ function test_nxtp_state_sensitive() = {
     PR[0] = 0x00000000_00000000_00000000_00000800;
 
     // Lookup in state 0
-    let _ = execute(PNXTP(PR0, 0x00, 0x10));
+    let _ = pexecute(PNXTP(PR0, 0x00, 0x10));
     assert(nxtp_result_pc == 0x0064, "State 0 should match rule 0 (PC=100)");
 
     // Change to state 1 and look up again
     parser_state = 0x01;
-    let _ = execute(PNXTP(PR0, 0x00, 0x10));
+    let _ = pexecute(PNXTP(PR0, 0x00, 0x10));
     assert(nxtp_result_pc == 0x00C8, "State 1 should match rule 1 (PC=200)")
 }
 
@@ -52,7 +52,7 @@ function test_brns_taken() = {
     write_transition_rule(5, 0x00, 0x000800, 0x0064, 0x01);
     // Set Z flag so EQ condition is met
     pflag_z = true;
-    let _ = execute(PBRNS(PCC_EQ, 0x05));
+    let _ = pexecute(PBRNS(PCC_EQ, 0x05));
     assert(ppc == 0x0064, "BRNS should branch to rule 5's PC (100)");
     assert(parser_state == 0x01, "BRNS should update parser_state to 1")
 }
@@ -64,7 +64,7 @@ function test_brns_not_taken() = {
     write_transition_rule(5, 0x00, 0x000800, 0x0064, 0x01);
     ppc = 0x0010;
     pflag_z = false;
-    let _ = execute(PBRNS(PCC_EQ, 0x05));
+    let _ = pexecute(PBRNS(PCC_EQ, 0x05));
     assert(ppc == 0x0010, "BRNS should not branch when condition not met");
     assert(parser_state == 0x00, "parser_state should remain 0")
 }
@@ -76,9 +76,9 @@ function test_brnxtp_matched() = {
     write_transition_rule(0, 0x00, 0x000800, 0x0064, 0x01);
     PR[0] = 0x00000000_00000000_00000000_00000800;
     // NXTP to set up result
-    let _ = execute(PNXTP(PR0, 0x00, 0x10));
+    let _ = pexecute(PNXTP(PR0, 0x00, 0x10));
     // BRNXTP with always-branch condition, JumpMode 000
-    let _ = execute(PBRNXTP(PCC_AL, 0x00, 0x0000));
+    let _ = pexecute(PBRNXTP(PCC_AL, 0x00, 0x0000));
     assert(ppc == 0x0064, "BRNXTP should branch to NXTP result PC");
     assert(parser_state == 0x01, "BRNXTP should update parser_state")
 }
@@ -89,9 +89,9 @@ function test_brnxtp_nomatch_mode0() = {
     parser_init();
     ppc = 0x0010;
     PR[0] = 0x00000000_00000000_00000000_00009999;
-    let _ = execute(PNXTP(PR0, 0x00, 0x10));
+    let _ = pexecute(PNXTP(PR0, 0x00, 0x10));
     assert(nxtp_matched == false, "should not match");
-    let _ = execute(PBRNXTP(PCC_AL, 0x00, 0x0000));
+    let _ = pexecute(PBRNXTP(PCC_AL, 0x00, 0x0000));
     assert(ppc == 0x0010, "JumpMode 000 should not change PC")
 }
 
@@ -101,10 +101,10 @@ function test_brnxtp_nomatch_mode2() = {
     parser_init();
     ppc = 0x0010;
     PR[0] = 0x00000000_00000000_00000000_00009999;
-    let _ = execute(PNXTP(PR0, 0x00, 0x10));
+    let _ = pexecute(PNXTP(PR0, 0x00, 0x10));
     assert(nxtp_matched == false, "should not match");
     // JumpMode 010, address = 0x00FF
-    let _ = execute(PBRNXTP(PCC_AL, 0x02, 0x00FF));
+    let _ = pexecute(PBRNXTP(PCC_AL, 0x02, 0x00FF));
     assert(ppc == 0x00FF, "JumpMode 010 should jump to address 0xFF")
 }
 

@@ -6,7 +6,7 @@ function test_and_basic() = {
     PR[0] = 0x00000000_00000000_00000000_000000FF;
     PR[1] = 0x00000000_00000000_00000000_0000000F;
 
-    let _ = execute(PAND(PR2, 0x00, PR0, 0x00, PR1, 0x00, 0x08, false));
+    let _ = pexecute(PAND(PR2, 0x00, PR0, 0x00, PR1, 0x00, 0x08, false));
 
     assert(PR[2] == 0x00000000_00000000_00000000_0000000F, "AND: 0xFF & 0x0F = 0x0F");
     assert(pflag_z == false, "AND: result not zero")
@@ -18,7 +18,7 @@ function test_and_zero_result() = {
     PR[0] = 0x00000000_00000000_00000000_000000F0;
     PR[1] = 0x00000000_00000000_00000000_0000000F;
 
-    let _ = execute(PAND(PR2, 0x00, PR0, 0x00, PR1, 0x00, 0x08, false));
+    let _ = pexecute(PAND(PR2, 0x00, PR0, 0x00, PR1, 0x00, 0x08, false));
 
     assert(PR[2] == 0x00000000_00000000_00000000_00000000, "AND: 0xF0 & 0x0F = 0x00");
     assert(pflag_z == true, "AND: zero result sets Z flag")
@@ -29,7 +29,7 @@ function test_andi_basic() = {
     parser_init();
     PR[0] = 0x00000000_00000000_00000000_000000AB;
 
-    let _ = execute(PANDI(PR1, PR0, 0x000F, 0x08, false));
+    let _ = pexecute(PANDI(PR1, PR0, 0x000F, 0x08, false));
 
     assert(PR[1] == 0x00000000_00000000_00000000_0000000B, "ANDI: 0xAB & 0x0F = 0x0B");
     assert(pflag_z == false, "ANDI: result not zero")
@@ -40,7 +40,7 @@ function test_andi_zero_result() = {
     parser_init();
     PR[0] = 0x00000000_00000000_00000000_000000F0;
 
-    let _ = execute(PANDI(PR1, PR0, 0x000F, 0x08, false));
+    let _ = pexecute(PANDI(PR1, PR0, 0x000F, 0x08, false));
 
     assert(pflag_z == true, "ANDI: 0xF0 & 0x0F sets Z flag")
 }
@@ -51,7 +51,7 @@ function test_and_with_clear_dest() = {
     PR[0] = 0x00000000_00000000_00000000_000000FF;
     PR[1] = 0x00000000_00000000_00000000_0000000F;
     PR[2] = 0xFFFFFFFF_FFFFFFFF_FFFFFFFF_FFFFFFFF;
-    let _ = execute(PAND(PR2, 0x00, PR0, 0x00, PR1, 0x00, 0x08, true));
+    let _ = pexecute(PAND(PR2, 0x00, PR0, 0x00, PR1, 0x00, 0x08, true));
     assert(PR[2] == 0x00000000_00000000_00000000_0000000F,
         "AND.CD should clear dest then place AND result")
 }
@@ -61,7 +61,7 @@ function test_andi_with_clear_dest() = {
     parser_init();
     PR[0] = 0x00000000_00000000_00000000_000000AB;
     PR[1] = 0xFFFFFFFF_FFFFFFFF_FFFFFFFF_FFFFFFFF;
-    let _ = execute(PANDI(PR1, PR0, 0x000F, 0x08, true));
+    let _ = pexecute(PANDI(PR1, PR0, 0x000F, 0x08, true));
     assert(PR[1] == 0x00000000_00000000_00000000_0000000B,
         "ANDI.CD should clear dest then place AND result")
 }

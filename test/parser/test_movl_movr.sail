@@ -9,7 +9,7 @@ function test_movl_basic() = {
     PR[1] = 0x00000000_00000000_00000000_00000004;
     // PMOVL(rd, rs1, offs1, size1, rs2, offs2, size2, clear_dest)
     // Extract R0[7:0] (offs1=0, size1=8), offset = R1[2:0] + 0 = 4
-    let _ = execute(PMOVL(PR2, PR0, 0x00, 0x08, PR1, 0x00, 0x03, false));
+    let _ = pexecute(PMOVL(PR2, PR0, 0x00, 0x08, PR1, 0x00, 0x03, false));
     assert(read_preg(PR2) == 0x00000000_00000000_00000000_00000AB0,
         "MOVL should place 0xAB at R2[11:4]")
 }
@@ -21,7 +21,7 @@ function test_movl_cd() = {
     PR[0] = 0x00000000_00000000_00000000_000000AB;
     PR[1] = 0x00000000_00000000_00000000_00000004;
     PR[2] = 0xFFFFFFFF_FFFFFFFF_FFFFFFFF_FFFFFFFF;
-    let _ = execute(PMOVL(PR2, PR0, 0x00, 0x08, PR1, 0x00, 0x03, true));
+    let _ = pexecute(PMOVL(PR2, PR0, 0x00, 0x08, PR1, 0x00, 0x03, true));
     assert(read_preg(PR2) == 0x00000000_00000000_00000000_00000AB0,
         "MOVL.CD should clear dest then place 0xAB at R2[11:4]")
 }
@@ -33,7 +33,7 @@ function test_movli_basic() = {
     parser_init();
     PR[0] = 0x00000000_00000000_00000000_000000CD;
     // PMOVLI(rd, rs, offs, size, imm_value, clear_dest)
-    let _ = execute(PMOVLI(PR1, PR0, 0x00, 0x08, 0x10, false));
+    let _ = pexecute(PMOVLI(PR1, PR0, 0x00, 0x08, 0x10, false));
     assert(read_preg(PR1) == 0x00000000_00000000_00000000_00CD0000,
         "MOVLI should place 0xCD at R1[23:16]")
 }
@@ -45,7 +45,7 @@ function test_movlii_basic() = {
     parser_init();
     PR[0] = 0x00000000_00000000_00000000_00000008;
     // PMOVLII(rd, rs, offs, size, imm_value, imm_value_size, clear_dest)
-    let _ = execute(PMOVLII(PR1, PR0, 0x00, 0x04, 0x1F, 0x05, false));
+    let _ = pexecute(PMOVLII(PR1, PR0, 0x00, 0x04, 0x1F, 0x05, false));
     assert(read_preg(PR1) == 0x00000000_00000000_00000000_00001F00,
         "MOVLII should place 0x1F at R1[12:8]")
 }
@@ -58,7 +58,7 @@ function test_movr_basic() = {
     PR[0] = 0x00000000_00000000_000000AB_00000000;
     PR[1] = 0x00000000_00000000_00000000_00000004;
     // PMOVR(rd, rs1, offs1, size1, rs2, offs2, size2, clear_dest)
-    let _ = execute(PMOVR(PR2, PR0, 0x20, 0x08, PR1, 0x00, 0x03, false));
+    let _ = pexecute(PMOVR(PR2, PR0, 0x20, 0x08, PR1, 0x00, 0x03, false));
     assert(read_preg(PR2) == 0x00000000_00000000_0000000A_B0000000,
         "MOVR should place 0xAB at R2[35:28]")
 }
@@ -70,7 +70,7 @@ function test_movri_basic() = {
     parser_init();
     PR[0] = 0x00000000_00000000_000000EF_00000000;
     // PMOVRI(rd, rs, offs, size, imm_value, clear_dest)
-    let _ = execute(PMOVRI(PR1, PR0, 0x20, 0x08, 0x10, false));
+    let _ = pexecute(PMOVRI(PR1, PR0, 0x20, 0x08, 0x10, false));
     assert(read_preg(PR1) == 0x00000000_00000000_00000000_00EF0000,
         "MOVRI should place 0xEF at R1[23:16]")
 }
@@ -82,7 +82,7 @@ function test_movrii_basic() = {
     parser_init();
     PR[0] = 0x00000000_00000000_00000000_00000002;
     // PMOVRII(rd, rs, offs, size, imm_value, imm_value_size, clear_dest)
-    let _ = execute(PMOVRII(PR1, PR0, 0x00, 0x03, 0x1F, 0x05, false));
+    let _ = pexecute(PMOVRII(PR1, PR0, 0x00, 0x03, 0x1F, 0x05, false));
     assert(read_preg(PR1) == 0x00000000_00000000_00000000_00000007,
         "MOVRII should place ImmValue[4:2]=7 at R1[2:0]")
 }

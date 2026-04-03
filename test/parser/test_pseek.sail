@@ -8,7 +8,7 @@ function test_pseek_no_skip() = {
     PR[0] = 0x00000000_00000000_00000000_00000800;
     // No PSEEK entries configured — 0x0800 not in table
     // PPSEEK(dest_reg, dest_offset_bits, src_reg, src_offset_bits, size_bits, class_id)
-    let _ = execute(PPSEEK(PR1, 0x00, PR0, 0x00, 0x10, 0x00));
+    let _ = pexecute(PPSEEK(PR1, 0x00, PR0, 0x00, 0x10, 0x00));
     assert(PR[1] == 0x00000000_00000000_00000000_00000800,
         "PSEEK should store original protocol in R1");
     assert(pcursor == 0x00, "cursor should not advance when no match")
@@ -33,7 +33,7 @@ function test_pseek_skip_one() = {
     write_pseek_entry(0, 0x00, 0x8100, 0x04, 0x00, 0x10);
 
     PR[0] = 0x00000000_00000000_00000000_00008100;
-    let _ = execute(PPSEEK(PR1, 0x00, PR0, 0x00, 0x10, 0x00));
+    let _ = pexecute(PPSEEK(PR1, 0x00, PR0, 0x00, 0x10, 0x00));
 
     assert(pcursor == 0x10, "cursor should advance by 4 (from 12 to 16)");
     assert(PR[1] == 0x00000000_00000000_00000000_00000800,
@@ -57,7 +57,7 @@ function test_pseek_skip_two() = {
     write_pseek_entry(0, 0x00, 0x8100, 0x04, 0x00, 0x10);
 
     PR[0] = 0x00000000_00000000_00000000_00008100;
-    let _ = execute(PPSEEK(PR1, 0x00, PR0, 0x00, 0x10, 0x00));
+    let _ = pexecute(PPSEEK(PR1, 0x00, PR0, 0x00, 0x10, 0x00));
 
     assert(pcursor == 0x14, "cursor should advance by 8 (from 12 to 20)");
     assert(PR[1] == 0x00000000_00000000_00000000_00000800,
@@ -77,7 +77,7 @@ function test_pseeknxtp() = {
     write_transition_rule(0, 0x00, 0x000800, 0x0064, 0x01);
 
     PR[0] = 0x00000000_00000000_00000000_00008100;
-    let _ = execute(PPSEEKNXTP(PR1, 0x00, PR0, 0x00, 0x10, 0x00));
+    let _ = pexecute(PPSEEKNXTP(PR1, 0x00, PR0, 0x00, 0x10, 0x00));
 
     assert(pcursor == 0x10, "cursor should advance past VLAN");
     assert(PR[1] == 0x00000000_00000000_00000000_00000800,
@@ -98,7 +98,7 @@ function test_pseek_rn_dest() = {
     write_pseek_entry(0, 0x00, 0x8100, 0x04, 0x00, 0x10);
 
     PR[0] = 0x00000000_00000000_00000000_00008100;
-    let _ = execute(PPSEEK(PRN, 0x00, PR0, 0x00, 0x10, 0x00));
+    let _ = pexecute(PPSEEK(PRN, 0x00, PR0, 0x00, 0x10, 0x00));
 
     assert(pcursor == 0x10, "cursor should still advance");
     assert(read_preg(PRN) == sail_zeros(128), "RN should read as zero")

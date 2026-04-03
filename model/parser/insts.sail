@@ -1,9 +1,9 @@
 // Parser instruction execution.
 
 // Each instruction adds a clause to this scattered function.
-val execute : pinstr -> ExecutionResult
+val pexecute : pinstr -> ExecutionResult
 
-scattered function execute
+scattered function pexecute
 
 // Extract a protocol field from the packet at an absolute byte offset with a given bit size.
 // Used by the PSEEK scan loop to read next-protocol fields from packet headers.
@@ -32,12 +32,12 @@ function pseek_extract_proto(byte_offset, size_bits) = {
 }
 
 // NOP: No operation. Does nothing, returns success.
-function clause execute(PNOP()) = RETIRE_SUCCESS
+function clause pexecute(PNOP()) = RETIRE_SUCCESS
 
 // HALT: Terminate parsing.
 // PHALT(false) = HALT -- stop parsing, hand off to MAP.
 // PHALT(true)  = HALTDROP -- stop parsing, drop the packet.
-function clause execute(PHALT(drop)) = {
+function clause pexecute(PHALT(drop)) = {
     parser_halted = true;
     if drop then {
         parser_drop = true;
@@ -49,7 +49,7 @@ function clause execute(PHALT(drop)) = {
 
 // MOV: DestReg[dest_offset + size - 1 : dest_offset] = SourceReg[src_offset + size - 1 : src_offset]
 // Bit-field copy between registers. Other bits in destination are preserved.
-function clause execute(PMOV(rd, dest_offset, rs, src_offset, size_bits, clear_dest)) = {
+function clause pexecute(PMOV(rd, dest_offset, rs, src_offset, size_bits, clear_dest)) = {
     let src_val = read_preg(rs);
     let dst_val : bits128 = if clear_dest then sail_zeros(128) else read_preg(rd);
     let doff : nat = unsigned(dest_offset);
@@ -63,7 +63,7 @@ function clause execute(PMOV(rd, dest_offset, rs, src_offset, size_bits, clear_d
 
 // MOVI: DestReg[(dest_offset_bytes*8) + size_bits - 1 : (dest_offset_bytes*8)] = immediate[size_bits-1:0]
 // Load an immediate value (up to 16 bits) into a register at a byte-aligned offset.
-function clause execute(PMOVI(rd, dest_offset_bytes, immediate, size_bits, clear_dest)) = {
+function clause pexecute(PMOVI(rd, dest_offset_bytes, immediate, size_bits, clear_dest)) = {
     let dst_val : bits128 = if clear_dest then sail_zeros(128) else read_preg(rd);
     let doff : nat = unsigned(dest_offset_bytes) * 8;
     let sz : nat = unsigned(size_bits);
@@ -79,7 +79,7 @@ function clause execute(PMOVI(rd, dest_offset_bytes, immediate, size_bits, clear
 // The source offset is in bits, relative to the cursor position (which is in bytes).
 // Data is extracted from the packet in big-endian order.
 // If clear_dest is true (.CD modifier), the destination register is cleared before extraction.
-function clause execute(PEXT(rd, dest_offset, src_offset_bits, size_bits, clear_dest)) = {
+function clause pexecute(PEXT(rd, dest_offset, src_offset_bits, size_bits, clear_dest)) = {
     let doff = unsigned(dest_offset);
     let soff = unsigned(src_offset_bits);
     let sz = unsigned(size_bits);
@@ -124,7 +124,7 @@ function clause execute(PEXT(rd, dest_offset, src_offset_bits, size_bits, clear_
 
 // ADD: DestReg[dest_off + sz - 1 : dest_off] = Src1Reg[s1_off...] + Src2Reg[s2_off...]
 // Unsigned 16-bit addition. Sets Z flag.
-function clause execute(PADD(rd, dest_offset, rs1, src1_offset, rs2, src2_offset, size_bits, clear_dest)) = {
+function clause pexecute(PADD(rd, dest_offset, rs1, src1_offset, rs2, src2_offset, size_bits, clear_dest)) = {
     let s1_val = read_preg(rs1);
     let s2_val = read_preg(rs2);
     let dst_val : bits128 = if clear_dest then sail_zeros(128) else read_preg(rd);
@@ -143,7 +143,7 @@ function clause execute(PADD(rd, dest_offset, rs1, src1_offset, rs2, src2_offset
 
 // ADDI: DestReg[sz - 1 : 0] = SrcReg[sz - 1 : 0] + ImmediateValue
 // Unsigned addition with immediate. Sets Z flag.
-function clause execute(PADDI(rd, rs, immediate, size_bits, clear_dest)) = {
+function clause pexecute(PADDI(rd, rs, immediate, size_bits, clear_dest)) = {
     let src_val = read_preg(rs);
     let dst_val : bits128 = if clear_dest then sail_zeros(128) else read_preg(rd);
     let sz : nat = unsigned(size_bits);
@@ -158,7 +158,7 @@ function clause execute(PADDI(rd, rs, immediate, size_bits, clear_dest)) = {
 
 // SUB: DestReg[dest_off + sz - 1 : dest_off] = Src1Reg[s1_off...] - Src2Reg[s2_off...]
 // 16-bit subtraction. Sets Z and N flags.
-function clause execute(PSUB(rd, dest_offset, rs1, src1_offset, rs2, src2_offset, size_bits, clear_dest)) = {
+function clause pexecute(PSUB(rd, dest_offset, rs1, src1_offset, rs2, src2_offset, size_bits, clear_dest)) = {
     let s1_val = read_preg(rs1);
     let s2_val = read_preg(rs2);
     let dst_val : bits128 = if clear_dest then sail_zeros(128) else read_preg(rd);
@@ -177,7 +177,7 @@ function clause execute(PSUB(rd, dest_offset, rs1, src1_offset, rs2, src2_offset
 }
 
 // SUBI: DestReg[sz - 1 : 0] = SrcReg[sz - 1 : 0] - ImmediateValue
-function clause execute(PSUBI(rd, rs, immediate, size_bits, clear_dest)) = {
+function clause pexecute(PSUBI(rd, rs, immediate, size_bits, clear_dest)) = {
     let src_val = read_preg(rs);
     let dst_val : bits128 = if clear_dest then sail_zeros(128) else read_preg(rd);
     let sz : nat = unsigned(size_bits);
@@ -192,7 +192,7 @@ function clause execute(PSUBI(rd, rs, immediate, size_bits, clear_dest)) = {
 }
 
 // SUBII: DestReg[sz - 1 : 0] = ImmediateValue - SrcReg[sz - 1 : 0]
-function clause execute(PSUBII(rd, immediate, rs, size_bits, clear_dest)) = {
+function clause pexecute(PSUBII(rd, immediate, rs, size_bits, clear_dest)) = {
     let src_val = read_preg(rs);
     let dst_val : bits128 = if clear_dest then sail_zeros(128) else read_preg(rd);
     let sz : nat = unsigned(size_bits);
@@ -208,7 +208,7 @@ function clause execute(PSUBII(rd, immediate, rs, size_bits, clear_dest)) = {
 
 // AND: DestReg[dest_off + sz - 1 : dest_off] = Src1Reg[s1_off...] & Src2Reg[s2_off...]
 // Bitwise AND. Sets Z flag.
-function clause execute(PAND(rd, dest_offset, rs1, src1_offset, rs2, src2_offset, size_bits, clear_dest)) = {
+function clause pexecute(PAND(rd, dest_offset, rs1, src1_offset, rs2, src2_offset, size_bits, clear_dest)) = {
     let s1_val = read_preg(rs1);
     let s2_val = read_preg(rs2);
     let dst_val : bits128 = if clear_dest then sail_zeros(128) else read_preg(rd);
@@ -226,7 +226,7 @@ function clause execute(PAND(rd, dest_offset, rs1, src1_offset, rs2, src2_offset
 }
 
 // ANDI: DestReg[sz - 1 : 0] = SrcReg[sz - 1 : 0] & ImmediateValue
-function clause execute(PANDI(rd, rs, immediate, size_bits, clear_dest)) = {
+function clause pexecute(PANDI(rd, rs, immediate, size_bits, clear_dest)) = {
     let src_val = read_preg(rs);
     let dst_val : bits128 = if clear_dest then sail_zeros(128) else read_preg(rd);
     let sz : nat = unsigned(size_bits);
@@ -241,7 +241,7 @@ function clause execute(PANDI(rd, rs, immediate, size_bits, clear_dest)) = {
 
 // OR: DestReg[dest_off + sz - 1 : dest_off] = Src1Reg[s1_off...] | Src2Reg[s2_off...]
 // Bitwise OR. Sets Z flag.
-function clause execute(POR(rd, dest_offset, rs1, src1_offset, rs2, src2_offset, size_bits, clear_dest)) = {
+function clause pexecute(POR(rd, dest_offset, rs1, src1_offset, rs2, src2_offset, size_bits, clear_dest)) = {
     let s1_val = read_preg(rs1);
     let s2_val = read_preg(rs2);
     let dst_val : bits128 = if clear_dest then sail_zeros(128) else read_preg(rd);
@@ -259,7 +259,7 @@ function clause execute(POR(rd, dest_offset, rs1, src1_offset, rs2, src2_offset,
 }
 
 // ORI: DestReg[sz - 1 : 0] = SrcReg[sz - 1 : 0] | ImmediateValue
-function clause execute(PORI(rd, rs, immediate, size_bits, clear_dest)) = {
+function clause pexecute(PORI(rd, rs, immediate, size_bits, clear_dest)) = {
     let src_val = read_preg(rs);
     let dst_val : bits128 = if clear_dest then sail_zeros(128) else read_preg(rd);
     let sz : nat = unsigned(size_bits);
@@ -273,7 +273,7 @@ function clause execute(PORI(rd, rs, immediate, size_bits, clear_dest)) = {
 }
 
 // CMP: Compare two register sub-fields. Sets Z and N flags. Does not store result.
-function clause execute(PCMP(rs1, src1_offset, rs2, src2_offset, size_bits)) = {
+function clause pexecute(PCMP(rs1, src1_offset, rs2, src2_offset, size_bits)) = {
     let s1_val = read_preg(rs1);
     let s2_val = read_preg(rs2);
     let s1off : nat = unsigned(src1_offset);
@@ -288,7 +288,7 @@ function clause execute(PCMP(rs1, src1_offset, rs2, src2_offset, size_bits)) = {
 }
 
 // CMPIBY: Compare register sub-field (byte offset) with immediate.
-function clause execute(PCMPIBY(rs, src_offset_bytes, immediate, size_bits)) = {
+function clause pexecute(PCMPIBY(rs, src_offset_bytes, immediate, size_bits)) = {
     let src_val = read_preg(rs);
     let soff : nat = unsigned(src_offset_bytes) * 8;
     let sz : nat = unsigned(size_bits);
@@ -301,7 +301,7 @@ function clause execute(PCMPIBY(rs, src_offset_bytes, immediate, size_bits)) = {
 }
 
 // CMPIBI: Compare register sub-field (bit offset) with immediate.
-function clause execute(PCMPIBI(rs, src_offset_bits, immediate, size_bits)) = {
+function clause pexecute(PCMPIBI(rs, src_offset_bits, immediate, size_bits)) = {
     let src_val = read_preg(rs);
     let soff : nat = unsigned(src_offset_bits);
     let sz : nat = unsigned(size_bits);
@@ -315,7 +315,7 @@ function clause execute(PCMPIBI(rs, src_offset_bits, immediate, size_bits)) = {
 
 // CNCTBY: Concatenate from two source registers (byte granularity).
 // Src1 at higher bits, Src2 at lower bits.
-function clause execute(PCNCTBY(
+function clause pexecute(PCNCTBY(
     rd,
     dest_offset_bytes,
     rs1,
@@ -344,7 +344,7 @@ function clause execute(PCNCTBY(
 }
 
 // CNCTBI: Concatenate from two source registers (bit granularity).
-function clause execute(PCNCTBI(
+function clause pexecute(PCNCTBI(
     rd,
     dest_offset_bits,
     rs1,
@@ -374,7 +374,7 @@ function clause execute(PCNCTBI(
 
 // BR: Branch to target address if condition is met.
 // Updates ppc when the branch is taken.
-function clause execute(PBR(cc, target)) = {
+function clause pexecute(PBR(cc, target)) = {
     if eval_pcond(cc) then {
         ppc = target
     };
@@ -383,7 +383,7 @@ function clause execute(PBR(cc, target)) = {
 
 // BRBTST: Test a single bit in a register and branch if condition is met.
 // PBT_CLR branches if the bit is 0, PBT_SET branches if the bit is 1.
-function clause execute(PBRBTST(btcc, rs, bit_offset, target)) = {
+function clause pexecute(PBRBTST(btcc, rs, bit_offset, target)) = {
     let src_val = read_preg(rs);
     let boff : nat = unsigned(bit_offset);
     let bit_val = extract_bits(src_val, boff, 1);
@@ -401,7 +401,7 @@ function clause execute(PBRBTST(btcc, rs, bit_offset, target)) = {
 // STC: Cursor += ((SrcReg[offset+size-1:offset] + AdditionalIncr) << SrcShift)
 // Extracts 1-8 bits from a register sub-field, adds AdditionalIncr,
 // left-shifts by SrcShift, and adds the result to the cursor.
-function clause execute(PSTC(rs, src_offset_bits, src_size_bits, src_shift, additional_incr)) = {
+function clause pexecute(PSTC(rs, src_offset_bits, src_size_bits, src_shift, additional_incr)) = {
     let src_val = read_preg(rs);
     let soff : nat = unsigned(src_offset_bits);
     let sz : nat = unsigned(src_size_bits);
@@ -416,7 +416,7 @@ function clause execute(PSTC(rs, src_offset_bits, src_size_bits, src_shift, addi
 // STCI: Cursor += IncrValue.
 // Increments the parser cursor by an immediate value (1-256).
 // Value is truncated to 8 bits to match cursor width.
-function clause execute(PSTCI(incr_value)) = {
+function clause pexecute(PSTCI(incr_value)) = {
     let incr_8 : bits8 = sail_mask(8, incr_value);
     pcursor = pcursor + incr_8;
     RETIRE_SUCCESS
@@ -424,7 +424,7 @@ function clause execute(PSTCI(incr_value)) = {
 
 // STH: Set header present and offset fields.
 // Optionally halt (.H modifier) after setting the header.
-function clause execute(PSTH(present_id, offset_id, halt)) = {
+function clause pexecute(PSTH(present_id, offset_id, halt)) = {
     set_hdr(present_id, offset_id);
     if halt then {
         parser_halted = true;
@@ -436,7 +436,7 @@ function clause execute(PSTH(present_id, offset_id, halt)) = {
 
 // STCH: Increment cursor, then set header (STCI + STH compound).
 // The header offset records the NEW cursor position (after increment).
-function clause execute(PSTCH(incr_value, present_id, offset_id, halt)) = {
+function clause pexecute(PSTCH(incr_value, present_id, offset_id, halt)) = {
     let incr_8 : bits8 = sail_mask(8, incr_value);
     pcursor = pcursor + incr_8;
     set_hdr(present_id, offset_id);
@@ -450,7 +450,7 @@ function clause execute(PSTCH(incr_value, present_id, offset_id, halt)) = {
 
 // STHC: Set header at current cursor, then increment cursor (STH + STCI compound).
 // The header offset records the OLD cursor position (before increment).
-function clause execute(PSTHC(incr_value, present_id, offset_id)) = {
+function clause pexecute(PSTHC(incr_value, present_id, offset_id)) = {
     set_hdr(present_id, offset_id);
     let incr_8 : bits8 = sail_mask(8, incr_value);
     pcursor = pcursor + incr_8;
@@ -460,7 +460,7 @@ function clause execute(PSTHC(incr_value, present_id, offset_id)) = {
 // ST: Struct0[struct_off + size - 1 : struct_off] = SrcReg[src_off + size - 1 : src_off]
 // Copies a bit-field from a parser register into Struct-0.
 // Optionally halt (.H modifier) after the store.
-function clause execute(PST(rs, src_offset_bits, struct_offset_bits, size_bits, halt)) = {
+function clause pexecute(PST(rs, src_offset_bits, struct_offset_bits, size_bits, halt)) = {
     let src_val = read_preg(rs);
     let soff : nat = unsigned(src_offset_bits);
     let doff : nat = unsigned(struct_offset_bits);
@@ -477,7 +477,7 @@ function clause execute(PST(rs, src_offset_bits, struct_offset_bits, size_bits, 
 
 // STI: Struct0[struct_off + size - 1 : struct_off] = ImmediateValue[size-1:0]
 // Stores an immediate value (up to 16 bits) into Struct-0.
-function clause execute(PSTI(immediate, struct_offset_bits, size_bits)) = {
+function clause pexecute(PSTI(immediate, struct_offset_bits, size_bits)) = {
     let doff : nat = unsigned(struct_offset_bits);
     let sz : nat = unsigned(size_bits);
     let imm_128 : bits128 = sail_zero_extend(immediate, 128);
@@ -487,7 +487,7 @@ function clause execute(PSTI(immediate, struct_offset_bits, size_bits)) = {
 
 // EXTMAP: MAPReg[dest_off + size - 1 : dest_off] = Packet[cursor*8 + pkt_off + size - 1 : cursor*8 + pkt_off]
 // Same extraction logic as EXT, but writes to a MAP register.
-function clause execute(PEXTMAP(map_idx, dest_offset, pkt_offset_bits, size_bits)) = {
+function clause pexecute(PEXTMAP(map_idx, dest_offset, pkt_offset_bits, size_bits)) = {
     let midx : int = unsigned(map_idx);
     let doff = unsigned(dest_offset);
     let soff = unsigned(pkt_offset_bits);
@@ -527,7 +527,7 @@ function clause execute(PEXTMAP(map_idx, dest_offset, pkt_offset_bits, size_bits
 
 // MOVMAP: MAPReg[dest_off + size - 1 : dest_off] = SrcReg[src_off + size - 1 : src_off]
 // Copies a bit-field from a parser register into a MAP register.
-function clause execute(PMOVMAP(map_idx, dest_offset, rs, src_offset, size_bits)) = {
+function clause pexecute(PMOVMAP(map_idx, dest_offset, rs, src_offset, size_bits)) = {
     let midx : int = unsigned(map_idx);
     let doff : nat = unsigned(dest_offset);
     let soff : nat = unsigned(src_offset);
@@ -545,7 +545,7 @@ function clause execute(PMOVMAP(map_idx, dest_offset, rs, src_offset, size_bits)
 // MOVL: DestReg[m:k] = SrcReg1[i1:j1]
 // k = SrcReg2[i2:j2] + OffsBits1 (dynamic offset, shift left)
 // m = k + SizeBits1 - 1
-function clause execute(PMOVL(rd, rs1, offs1, size1, rs2, offs2, size2, clear_dest)) = {
+function clause pexecute(PMOVL(rd, rs1, offs1, size1, rs2, offs2, size2, clear_dest)) = {
     let s1_val = read_preg(rs1);
     let s2_val = read_preg(rs2);
     let o1 : nat = unsigned(offs1);
@@ -564,7 +564,7 @@ function clause execute(PMOVL(rd, rs1, offs1, size1, rs2, offs2, size2, clear_de
 // MOVLI: DestReg[m:k] = SrcReg[i:j]
 // k = ImmValue + OffsBits (immediate offset, shift left)
 // m = k + SizeBits - 1
-function clause execute(PMOVLI(rd, rs, offs, size_bits, imm_value, clear_dest)) = {
+function clause pexecute(PMOVLI(rd, rs, offs, size_bits, imm_value, clear_dest)) = {
     let src_val = read_preg(rs);
     let o : nat = unsigned(offs);
     let sz : nat = unsigned(size_bits);
@@ -580,7 +580,7 @@ function clause execute(PMOVLI(rd, rs, offs, size_bits, imm_value, clear_dest)) 
 // MOVLII: DestReg[m-1:k] = ImmValue[n-1:0]
 // k = SrcReg[i:j] (register sub-field is the dest offset)
 // m = k + ImmValueSize
-function clause execute(PMOVLII(rd, rs, offs, size_bits, imm_value, imm_value_size, clear_dest)) = {
+function clause pexecute(PMOVLII(rd, rs, offs, size_bits, imm_value, imm_value_size, clear_dest)) = {
     let src_val = read_preg(rs);
     let o : nat = unsigned(offs);
     let sz : nat = unsigned(size_bits);
@@ -596,7 +596,7 @@ function clause execute(PMOVLII(rd, rs, offs, size_bits, imm_value, imm_value_si
 // MOVR: DestReg[m:k] = SrcReg1[i1:j1]
 // k = OffsBits1 - SrcReg2[i2:j2] (dynamic offset, shift right)
 // m = k + SizeBits1 - 1
-function clause execute(PMOVR(rd, rs1, offs1, size1, rs2, offs2, size2, clear_dest)) = {
+function clause pexecute(PMOVR(rd, rs1, offs1, size1, rs2, offs2, size2, clear_dest)) = {
     let s1_val = read_preg(rs1);
     let s2_val = read_preg(rs2);
     let o1 : nat = unsigned(offs1);
@@ -616,7 +616,7 @@ function clause execute(PMOVR(rd, rs1, offs1, size1, rs2, offs2, size2, clear_de
 // MOVRI: DestReg[m:k] = SrcReg[i:j]
 // k = OffsBits - ImmValue (immediate offset, shift right)
 // m = k + SizeBits - 1
-function clause execute(PMOVRI(rd, rs, offs, size_bits, imm_value, clear_dest)) = {
+function clause pexecute(PMOVRI(rd, rs, offs, size_bits, imm_value, clear_dest)) = {
     let src_val = read_preg(rs);
     let o : nat = unsigned(offs);
     let sz : nat = unsigned(size_bits);
@@ -633,7 +633,7 @@ function clause execute(PMOVRI(rd, rs, offs, size_bits, imm_value, clear_dest)) 
 // MOVRII: DestReg[m-1:0] = ImmValue[n-1:k]
 // k = SrcReg[i:j] (register sub-field)
 // m = ImmValueSize - SrcReg[i:j]
-function clause execute(PMOVRII(rd, rs, offs, size_bits, imm_value, imm_value_size, clear_dest)) = {
+function clause pexecute(PMOVRII(rd, rs, offs, size_bits, imm_value, imm_value_size, clear_dest)) = {
     let src_val = read_preg(rs);
     let o : nat = unsigned(offs);
     let sz : nat = unsigned(size_bits);
@@ -652,7 +652,7 @@ function clause execute(PMOVRII(rd, rs, offs, size_bits, imm_value, imm_value_si
 
 // NXTP: Extract protocol key from register, look up in transition table.
 // Stores result in nxtp_result_pc/nxtp_result_state/nxtp_matched.
-function clause execute(PNXTP(rs, src_offset_bits, size_bits)) = {
+function clause pexecute(PNXTP(rs, src_offset_bits, size_bits)) = {
     let src_val = read_preg(rs);
     let soff : nat = unsigned(src_offset_bits);
     let sz : nat = unsigned(size_bits);
@@ -665,7 +665,7 @@ function clause execute(PNXTP(rs, src_offset_bits, size_bits)) = {
 
 // BRNS: Branch to the next-state PC from a specific transition rule.
 // Updates parser_state and ppc if condition is met.
-function clause execute(PBRNS(cc, rule_num)) = {
+function clause pexecute(PBRNS(cc, rule_num)) = {
     if eval_pcond(cc) then {
         let idx : int = unsigned(rule_num);
         ppc = read_tt_next_pc(idx);
@@ -677,7 +677,7 @@ function clause execute(PBRNS(cc, rule_num)) = {
 // BRNXTP: Branch to next-protocol entry point (from NXTP result).
 // JumpMode controls behavior when NXTP had no match.
 // jump_mode encoding: 000=nop, 001=continue, 010=jump to address, 011=use rule
-function clause execute(PBRNXTP(cc, jump_mode, addr_or_rule)) = {
+function clause pexecute(PBRNXTP(cc, jump_mode, addr_or_rule)) = {
     if eval_pcond(cc) then {
         if nxtp_matched then {
             // Match: branch to NXTP result
@@ -711,7 +711,7 @@ function clause execute(PBRNXTP(cc, jump_mode, addr_or_rule)) = {
 
 // EXTNXTP: Extract data from packet into register, then NXTP lookup with extracted key.
 // Combines EXT (at dest offset 0) + NXTP in one instruction. Size limited to 1-24 bits.
-function clause execute(PEXTNXTP(rd, src_offset_bits, size_bits, clear_dest)) = {
+function clause pexecute(PEXTNXTP(rd, src_offset_bits, size_bits, clear_dest)) = {
     let soff = unsigned(src_offset_bits);
     let sz = unsigned(size_bits);
     let cursor_bit_offset = unsigned(pcursor) * 8;
@@ -750,7 +750,7 @@ function clause execute(PEXTNXTP(rd, src_offset_bits, size_bits, clear_dest)) = 
 
 // BRBTSTNXTP: Test bit in register, branch to next protocol if condition met.
 // Combines BRBTST condition check + BRNXTP branch logic.
-function clause execute(PBRBTSTNXTP(btcc, rs, bit_offset, jump_mode, addr_or_rule)) = {
+function clause pexecute(PBRBTSTNXTP(btcc, rs, bit_offset, jump_mode, addr_or_rule)) = {
     let src_val = read_preg(rs);
     let boff : nat = unsigned(bit_offset);
     let bit_val = extract_bits(src_val, boff, 1);
@@ -785,7 +785,7 @@ function clause execute(PBRBTSTNXTP(btcc, rs, bit_offset, jump_mode, addr_or_rul
 
 // BRBTSTNS: Test bit in register, branch to next state from transition rule if condition met.
 // Combines BRBTST condition check + BRNS branch logic.
-function clause execute(PBRBTSTNS(btcc, rs, bit_offset, rule_num)) = {
+function clause pexecute(PBRBTSTNS(btcc, rs, bit_offset, rule_num)) = {
     let src_val = read_preg(rs);
     let boff : nat = unsigned(bit_offset);
     let bit_val = extract_bits(src_val, boff, 1);
@@ -804,7 +804,7 @@ function clause execute(PBRBTSTNS(btcc, rs, bit_offset, rule_num)) = {
 
 // PSEEK: Scan forward through packet headers, skipping protocols in the PSEEK table.
 // Advances cursor past each matched header. Stores final (unmatched) protocol in DestReg.
-function clause execute(PPSEEK(rd, dest_offset_bits, rs, src_offset_bits, size_bits, class_id)) = {
+function clause pexecute(PPSEEK(rd, dest_offset_bits, rs, src_offset_bits, size_bits, class_id)) = {
     let src_val = read_preg(rs);
     let soff : nat = unsigned(src_offset_bits);
     let sz : nat = unsigned(size_bits);
@@ -843,7 +843,7 @@ function clause execute(PPSEEK(rd, dest_offset_bits, rs, src_offset_bits, size_b
 }
 
 // PSEEKNXTP: PSEEK scan + NXTP lookup with final protocol value.
-function clause execute(PPSEEKNXTP(rd, dest_offset_bits, rs, src_offset_bits, size_bits, class_id)) = {
+function clause pexecute(PPSEEKNXTP(rd, dest_offset_bits, rs, src_offset_bits, size_bits, class_id)) = {
     let src_val = read_preg(rs);
     let soff : nat = unsigned(src_offset_bits);
     let sz : nat = unsigned(size_bits);
@@ -882,4 +882,4 @@ function clause execute(PPSEEKNXTP(rd, dest_offset_bits, rs, src_offset_bits, si
     RETIRE_SUCCESS
 }
 
-end execute
+end pexecute
