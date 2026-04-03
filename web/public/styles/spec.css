@@ -106,6 +106,35 @@ h3:hover .heading-anchor {
   margin-bottom: 0.5rem;
 }
 
+/* WaveDrom dark theme overrides */
+.instruction-detail svg text {
+  fill: var(--text) !important;
+}
+
+.instruction-detail svg .s1,
+.instruction-detail svg .s2,
+.instruction-detail svg .s3,
+.instruction-detail svg .s4 {
+  stroke: var(--text-dim) !important;
+}
+
+.instruction-detail svg .s5,
+.instruction-detail svg .s7 {
+  fill: var(--surface) !important;
+}
+
+.instruction-detail svg .s6 {
+  fill: var(--text) !important;
+}
+
+.instruction-detail svg .s8  { fill: #4a4520 !important; }
+.instruction-detail svg .s9  { fill: #4a3518 !important; }
+.instruction-detail svg .s10 { fill: #1a3550 !important; }
+.instruction-detail svg .s11 { fill: #1a4545 !important; }
+.instruction-detail svg .s12 { fill: #1a4520 !important; }
+.instruction-detail svg .s13 { fill: #3a1a45 !important; }
+.instruction-detail svg .s14 { fill: #451a1a !important; }
+
 .sail-code {
   background: var(--surface);
   border: 1px solid var(--border);
