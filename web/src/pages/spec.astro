@@ -24,9 +24,19 @@ function getMexecuteClause(patternId: string): string | null {
   const clause = clauses.find((c: any) => c.pattern?.id === patternId);
   return clause?.source ?? null;
 }
+
+function getEncodingWavedrom(mappingName: string, patternId: string): string | null {
+  if (!doc) return null;
+  const clauses = doc.mappings?.[mappingName]?.mapping;
+  if (!Array.isArray(clauses)) return null;
+  const clause = clauses.find((c: any) => c.left?.id === patternId);
+  return clause?.right_wavedrom ?? null;
+}
 ---
 <Base title="Spec">
   <link slot="head" rel="stylesheet" href={`${import.meta.env.BASE_URL}/styles/spec.css`} />
+  <script is:inline slot="head" src="https://cdnjs.cloudflare.com/ajax/libs/wavedrom/3.5.0/skins/default.js"></script>
+  <script is:inline slot="head" src="https://cdnjs.cloudflare.com/ajax/libs/wavedrom/3.5.0/wavedrom.min.js"></script>
   <div class="spec-page">
     <h1>XISA Spec Coverage</h1>
 
@@ -69,7 +79,7 @@ function getMexecuteClause(patternId: string): string | null {
       </tbody>
     </table>
 
-    <h3>Parser Instruction Semantics</h3>
+    <h3>Parser Instruction Details</h3>
 
     {[
       ['PNOP'], ['PHALT'],
@@ -87,8 +97,15 @@ function getMexecuteClause(patternId: string): string | null {
       ['PPSEEK', 'PPSEEKNXTP'],
     ].map((group) => (
       group.map((id) => {
+        const wavedrom = getEncodingWavedrom('encdec', id);
         const src = getExecuteClause(id);
-        return src ? <div class="sail-code" set:text={src} /> : null;
+        return (src || wavedrom) ? (
+          <div class="instruction-detail">
+            <h4>{id}</h4>
+            {wavedrom && <script type="WaveDrom" set:text={wavedrom} />}
+            {src && <div class="sail-code" set:text={src} />}
+          </div>
+        ) : null;
       })
     ))}
 
@@ -128,7 +145,7 @@ function getMexecuteClause(patternId: string): string | null {
       </tbody>
     </table>
 
-    <h3>MAP Instruction Semantics</h3>
+    <h3>MAP Instruction Details</h3>
 
     {[
       ['MNOP'], ['MHALT'],
@@ -142,8 +159,15 @@ function getMexecuteClause(patternId: string): string | null {
       ['MBR', 'MBRI', 'MBRBTST'],
     ].map((group) => (
       group.map((id) => {
+        const wavedrom = getEncodingWavedrom('mencdec', id);
         const src = getMexecuteClause(id);
-        return src ? <div class="sail-code" set:text={src} /> : null;
+        return (src || wavedrom) ? (
+          <div class="instruction-detail">
+            <h4>{id}</h4>
+            {wavedrom && <script type="WaveDrom" set:text={wavedrom} />}
+            {src && <div class="sail-code" set:text={src} />}
+          </div>
+        ) : null;
       })
     ))}
 
@@ -153,4 +177,11 @@ function getMexecuteClause(patternId: string): string | null {
       for the full model.
     </p>
   </div>
+  <script is:inline>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof WaveDrom !== 'undefined') {
+        WaveDrom.ProcessAll();
+      }
+    });
+  </script>
 </Base>

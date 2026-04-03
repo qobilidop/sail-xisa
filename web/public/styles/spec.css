@@ -67,6 +67,17 @@
   color: var(--text-dim);
 }
 
+.instruction-detail {
+  margin-bottom: 2rem;
+}
+
+.instruction-detail h4 {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
 .sail-code {
   background: var(--surface);
   border: 1px solid var(--border);
