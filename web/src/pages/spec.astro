@@ -49,278 +49,278 @@ function getEncodingWavedrom(mappingName: string, patternId: string): string | n
       Section numbers refer to the official white paper.
     </div>
 
-    <h2>3 Parser Programming Model</h2>
+    <h2 id="3"><a href="#3" class="heading-anchor">#</a> 3 Parser Programming Model</h2>
 
-    <h3>3.12.1 NXTP</h3>
+    <h3 id="3-12-1"><a href="#3-12-1" class="heading-anchor">#</a> 3.12.1 NXTP</h3>
     <p class="spec-status"><span class="status-done">Done</span></p>
     {['PNXTP'].map(id => {
       const w = getEncodingWavedrom('encdec', id); const s = getExecuteClause(id);
       return <div class="instruction-detail">{w && <script type="WaveDrom" set:html={w} />}{s && <div class="sail-code" set:text={s} />}</div>;
     })}
 
-    <h3>3.12.2 PSEEK, PSEEKNXTP</h3>
+    <h3 id="3-12-2"><a href="#3-12-2" class="heading-anchor">#</a> 3.12.2 PSEEK, PSEEKNXTP</h3>
     <p class="spec-status"><span class="status-done">Done</span> — No PSEEK_ERROR/trap, no .CD. Fixed hdr length per entry</p>
     {['PPSEEK', 'PPSEEKNXTP'].map(id => {
       const w = getEncodingWavedrom('encdec', id); const s = getExecuteClause(id);
       return <div class="instruction-detail">{w && <script type="WaveDrom" set:html={w} />}{s && <div class="sail-code" set:text={s} />}</div>;
     })}
 
-    <h3>3.12.3 EXT, EXTNXTP</h3>
+    <h3 id="3-12-3"><a href="#3-12-3" class="heading-anchor">#</a> 3.12.3 EXT, EXTNXTP</h3>
     <p class="spec-status"><span class="status-done">Done</span> — .CD supported. No .PR, .SCSM, .ECSM yet</p>
     {['PEXT', 'PEXTNXTP'].map(id => {
       const w = getEncodingWavedrom('encdec', id); const s = getExecuteClause(id);
       return <div class="instruction-detail">{w && <script type="WaveDrom" set:html={w} />}{s && <div class="sail-code" set:text={s} />}</div>;
     })}
 
-    <h3>3.12.4 EXTMAP</h3>
+    <h3 id="3-12-4"><a href="#3-12-4" class="heading-anchor">#</a> 3.12.4 EXTMAP</h3>
     <p class="spec-status"><span class="status-done">Done</span> — No .PR, .SCSM, .ECSM yet</p>
     {['PEXTMAP'].map(id => {
       const w = getEncodingWavedrom('encdec', id); const s = getExecuteClause(id);
       return <div class="instruction-detail">{w && <script type="WaveDrom" set:html={w} />}{s && <div class="sail-code" set:text={s} />}</div>;
     })}
 
-    <h3>3.12.5 MOVMAP</h3>
+    <h3 id="3-12-5"><a href="#3-12-5" class="heading-anchor">#</a> 3.12.5 MOVMAP</h3>
     <p class="spec-status"><span class="status-done">Done</span> — No .HDR modifier yet</p>
     {['PMOVMAP'].map(id => {
       const w = getEncodingWavedrom('encdec', id); const s = getExecuteClause(id);
       return <div class="instruction-detail">{w && <script type="WaveDrom" set:html={w} />}{s && <div class="sail-code" set:text={s} />}</div>;
     })}
 
-    <h3>3.12.6 CNCTBY, CNCTBI</h3>
+    <h3 id="3-12-6"><a href="#3-12-6" class="heading-anchor">#</a> 3.12.6 CNCTBY, CNCTBI</h3>
     <p class="spec-status"><span class="status-done">Done</span> — .CD supported</p>
     {['PCNCTBY', 'PCNCTBI'].map(id => {
       const w = getEncodingWavedrom('encdec', id); const s = getExecuteClause(id);
       return <div class="instruction-detail">{w && <script type="WaveDrom" set:html={w} />}{s && <div class="sail-code" set:text={s} />}</div>;
     })}
 
-    <h3>3.12.7 STH</h3>
+    <h3 id="3-12-7"><a href="#3-12-7" class="heading-anchor">#</a> 3.12.7 STH</h3>
     <p class="spec-status"><span class="status-done">Done</span> — .H supported. No JumpMode, .SCSM, .ECSM yet</p>
     {['PSTH'].map(id => {
       const w = getEncodingWavedrom('encdec', id); const s = getExecuteClause(id);
       return <div class="instruction-detail">{w && <script type="WaveDrom" set:html={w} />}{s && <div class="sail-code" set:text={s} />}</div>;
     })}
 
-    <h3>3.12.8 STC, STCI</h3>
+    <h3 id="3-12-8"><a href="#3-12-8" class="heading-anchor">#</a> 3.12.8 STC, STCI</h3>
     <p class="spec-status"><span class="status-done">Done</span> — No JumpMode, .SCSM, .ECSM yet</p>
     {['PSTC', 'PSTCI'].map(id => {
       const w = getEncodingWavedrom('encdec', id); const s = getExecuteClause(id);
       return <div class="instruction-detail">{w && <script type="WaveDrom" set:html={w} />}{s && <div class="sail-code" set:text={s} />}</div>;
     })}
 
-    <h3>3.12.9 STCH, STHC</h3>
+    <h3 id="3-12-9"><a href="#3-12-9" class="heading-anchor">#</a> 3.12.9 STCH, STHC</h3>
     <p class="spec-status"><span class="status-done">Done</span> — .H supported (STCH). No JumpMode, .SCSM, .ECSM yet</p>
     {['PSTCH', 'PSTHC'].map(id => {
       const w = getEncodingWavedrom('encdec', id); const s = getExecuteClause(id);
       return <div class="instruction-detail">{w && <script type="WaveDrom" set:html={w} />}{s && <div class="sail-code" set:text={s} />}</div>;
     })}
 
-    <h3>3.12.10 ST, STI</h3>
+    <h3 id="3-12-10"><a href="#3-12-10" class="heading-anchor">#</a> 3.12.10 ST, STI</h3>
     <p class="spec-status"><span class="status-done">Done</span> — .H supported (ST). HW bits 6-31 restriction not enforced</p>
     {['PST', 'PSTI'].map(id => {
       const w = getEncodingWavedrom('encdec', id); const s = getExecuteClause(id);
       return <div class="instruction-detail">{w && <script type="WaveDrom" set:html={w} />}{s && <div class="sail-code" set:text={s} />}</div>;
     })}
 
-    <h3>3.12.11 MOV, MOVI</h3>
+    <h3 id="3-12-11"><a href="#3-12-11" class="heading-anchor">#</a> 3.12.11 MOV, MOVI</h3>
     <p class="spec-status"><span class="status-done">Done</span> — .CD supported</p>
     {['PMOV', 'PMOVI'].map(id => {
       const w = getEncodingWavedrom('encdec', id); const s = getExecuteClause(id);
       return <div class="instruction-detail">{w && <script type="WaveDrom" set:html={w} />}{s && <div class="sail-code" set:text={s} />}</div>;
     })}
 
-    <h3>3.12.12 MOVL, MOVLI, MOVLII, MOVR, MOVRI, MOVRII</h3>
+    <h3 id="3-12-12"><a href="#3-12-12" class="heading-anchor">#</a> 3.12.12 MOVL, MOVLI, MOVLII, MOVR, MOVRI, MOVRII</h3>
     <p class="spec-status"><span class="status-done">Done</span> — .CD supported</p>
     {['PMOVL', 'PMOVLI', 'PMOVLII', 'PMOVR', 'PMOVRI', 'PMOVRII'].map(id => {
       const w = getEncodingWavedrom('encdec', id); const s = getExecuteClause(id);
       return <div class="instruction-detail">{w && <script type="WaveDrom" set:html={w} />}{s && <div class="sail-code" set:text={s} />}</div>;
     })}
 
-    <h3>3.12.13 ADD, ADDI</h3>
+    <h3 id="3-12-13"><a href="#3-12-13" class="heading-anchor">#</a> 3.12.13 ADD, ADDI</h3>
     <p class="spec-status"><span class="status-done">Done</span> — .CD supported</p>
     {['PADD', 'PADDI'].map(id => {
       const w = getEncodingWavedrom('encdec', id); const s = getExecuteClause(id);
       return <div class="instruction-detail">{w && <script type="WaveDrom" set:html={w} />}{s && <div class="sail-code" set:text={s} />}</div>;
     })}
 
-    <h3>3.12.14 SUB, SUBI, SUBII</h3>
+    <h3 id="3-12-14"><a href="#3-12-14" class="heading-anchor">#</a> 3.12.14 SUB, SUBI, SUBII</h3>
     <p class="spec-status"><span class="status-done">Done</span> — .CD supported</p>
     {['PSUB', 'PSUBI', 'PSUBII'].map(id => {
       const w = getEncodingWavedrom('encdec', id); const s = getExecuteClause(id);
       return <div class="instruction-detail">{w && <script type="WaveDrom" set:html={w} />}{s && <div class="sail-code" set:text={s} />}</div>;
     })}
 
-    <h3>3.12.15 AND, ANDI</h3>
+    <h3 id="3-12-15"><a href="#3-12-15" class="heading-anchor">#</a> 3.12.15 AND, ANDI</h3>
     <p class="spec-status"><span class="status-done">Done</span> — .CD supported</p>
     {['PAND', 'PANDI'].map(id => {
       const w = getEncodingWavedrom('encdec', id); const s = getExecuteClause(id);
       return <div class="instruction-detail">{w && <script type="WaveDrom" set:html={w} />}{s && <div class="sail-code" set:text={s} />}</div>;
     })}
 
-    <h3>3.12.16 OR, ORI</h3>
+    <h3 id="3-12-16"><a href="#3-12-16" class="heading-anchor">#</a> 3.12.16 OR, ORI</h3>
     <p class="spec-status"><span class="status-done">Done</span> — .CD supported</p>
     {['POR', 'PORI'].map(id => {
       const w = getEncodingWavedrom('encdec', id); const s = getExecuteClause(id);
       return <div class="instruction-detail">{w && <script type="WaveDrom" set:html={w} />}{s && <div class="sail-code" set:text={s} />}</div>;
     })}
 
-    <h3>3.12.17 CMP, CMPIBY, CMPIBI</h3>
+    <h3 id="3-12-17"><a href="#3-12-17" class="heading-anchor">#</a> 3.12.17 CMP, CMPIBY, CMPIBI</h3>
     <p class="spec-status"><span class="status-done">Done</span></p>
     {['PCMP', 'PCMPIBY', 'PCMPIBI'].map(id => {
       const w = getEncodingWavedrom('encdec', id); const s = getExecuteClause(id);
       return <div class="instruction-detail">{w && <script type="WaveDrom" set:html={w} />}{s && <div class="sail-code" set:text={s} />}</div>;
     })}
 
-    <h3>3.12.18 BR, BRNS, BRBTST, BRNXTP, BRBTSTNXTP, BRBTSTNS</h3>
+    <h3 id="3-12-18"><a href="#3-12-18" class="heading-anchor">#</a> 3.12.18 BR, BRNS, BRBTST, BRNXTP, BRBTSTNXTP, BRBTSTNS</h3>
     <p class="spec-status"><span class="status-done">Done</span> — JumpMode 100 (trap) deferred</p>
     {['PBR', 'PBRNS', 'PBRBTST', 'PBRNXTP', 'PBRBTSTNXTP', 'PBRBTSTNS'].map(id => {
       const w = getEncodingWavedrom('encdec', id); const s = getExecuteClause(id);
       return <div class="instruction-detail">{w && <script type="WaveDrom" set:html={w} />}{s && <div class="sail-code" set:text={s} />}</div>;
     })}
 
-    <h3>3.12.19 HALT, HALTDROP</h3>
+    <h3 id="3-12-19"><a href="#3-12-19" class="heading-anchor">#</a> 3.12.19 HALT, HALTDROP</h3>
     <p class="spec-status"><span class="status-done">Done</span> — No .RP or MAP-PC support yet</p>
     {['PHALT'].map(id => {
       const w = getEncodingWavedrom('encdec', id); const s = getExecuteClause(id);
       return <div class="instruction-detail">{w && <script type="WaveDrom" set:html={w} />}{s && <div class="sail-code" set:text={s} />}</div>;
     })}
 
-    <h3>3.12.20 NOP</h3>
+    <h3 id="3-12-20"><a href="#3-12-20" class="heading-anchor">#</a> 3.12.20 NOP</h3>
     <p class="spec-status"><span class="status-done">Done</span></p>
     {['PNOP'].map(id => {
       const w = getEncodingWavedrom('encdec', id); const s = getExecuteClause(id);
       return <div class="instruction-detail">{w && <script type="WaveDrom" set:html={w} />}{s && <div class="sail-code" set:text={s} />}</div>;
     })}
 
-    <h2>4 MAP Programming Model</h2>
+    <h2 id="4"><a href="#4" class="heading-anchor">#</a> 4 MAP Programming Model</h2>
 
-    <h3>4.13.1 ADD, ADDI</h3>
+    <h3 id="4-13-1"><a href="#4-13-1" class="heading-anchor">#</a> 4.13.1 ADD, ADDI</h3>
     <p class="spec-status"><span class="status-done">Done</span> — .F, .SX, .SH supported</p>
     {['MADD', 'MADDI'].map(id => {
       const w = getEncodingWavedrom('mencdec', id); const s = getMexecuteClause(id);
       return <div class="instruction-detail">{w && <script type="WaveDrom" set:html={w} />}{s && <div class="sail-code" set:text={s} />}</div>;
     })}
 
-    <h3>4.13.2 SUB, SUBI</h3>
+    <h3 id="4-13-2"><a href="#4-13-2" class="heading-anchor">#</a> 4.13.2 SUB, SUBI</h3>
     <p class="spec-status"><span class="status-done">Done</span> — .F, .SX, .SH supported</p>
     {['MSUB', 'MSUBI'].map(id => {
       const w = getEncodingWavedrom('mencdec', id); const s = getMexecuteClause(id);
       return <div class="instruction-detail">{w && <script type="WaveDrom" set:html={w} />}{s && <div class="sail-code" set:text={s} />}</div>;
     })}
 
-    <h3>4.13.3 MOD, MODI</h3>
+    <h3 id="4-13-3"><a href="#4-13-3" class="heading-anchor">#</a> 4.13.3 MOD, MODI</h3>
     <p class="spec-status"><span class="status-not-started">Not started</span> — Async, needs LFLAG</p>
 
-    <h3>4.13.4 CMP, CMPI</h3>
+    <h3 id="4-13-4"><a href="#4-13-4" class="heading-anchor">#</a> 4.13.4 CMP, CMPI</h3>
     <p class="spec-status"><span class="status-done">Done</span> — Always sets Z, C</p>
     {['MCMP', 'MCMPI'].map(id => {
       const w = getEncodingWavedrom('mencdec', id); const s = getMexecuteClause(id);
       return <div class="instruction-detail">{w && <script type="WaveDrom" set:html={w} />}{s && <div class="sail-code" set:text={s} />}</div>;
     })}
 
-    <h3>4.13.5 AND, ANDI</h3>
+    <h3 id="4-13-5"><a href="#4-13-5" class="heading-anchor">#</a> 4.13.5 AND, ANDI</h3>
     <p class="spec-status"><span class="status-done">Done</span> — .F supported</p>
     {['MAND', 'MANDI'].map(id => {
       const w = getEncodingWavedrom('mencdec', id); const s = getMexecuteClause(id);
       return <div class="instruction-detail">{w && <script type="WaveDrom" set:html={w} />}{s && <div class="sail-code" set:text={s} />}</div>;
     })}
 
-    <h3>4.13.6 OR, ORI</h3>
+    <h3 id="4-13-6"><a href="#4-13-6" class="heading-anchor">#</a> 4.13.6 OR, ORI</h3>
     <p class="spec-status"><span class="status-done">Done</span> — .F supported</p>
     {['MOR', 'MORI'].map(id => {
       const w = getEncodingWavedrom('mencdec', id); const s = getMexecuteClause(id);
       return <div class="instruction-detail">{w && <script type="WaveDrom" set:html={w} />}{s && <div class="sail-code" set:text={s} />}</div>;
     })}
 
-    <h3>4.13.7 XOR, XORI</h3>
+    <h3 id="4-13-7"><a href="#4-13-7" class="heading-anchor">#</a> 4.13.7 XOR, XORI</h3>
     <p class="spec-status"><span class="status-done">Done</span> — .F supported</p>
     {['MXOR', 'MXORI'].map(id => {
       const w = getEncodingWavedrom('mencdec', id); const s = getMexecuteClause(id);
       return <div class="instruction-detail">{w && <script type="WaveDrom" set:html={w} />}{s && <div class="sail-code" set:text={s} />}</div>;
     })}
 
-    <h3>4.13.8 NOT</h3>
+    <h3 id="4-13-8"><a href="#4-13-8" class="heading-anchor">#</a> 4.13.8 NOT</h3>
     <p class="spec-status"><span class="status-done">Done</span> — .F supported</p>
     {['MNOT'].map(id => {
       const w = getEncodingWavedrom('mencdec', id); const s = getMexecuteClause(id);
       return <div class="instruction-detail">{w && <script type="WaveDrom" set:html={w} />}{s && <div class="sail-code" set:text={s} />}</div>;
     })}
 
-    <h3>4.13.9 SHL, SHLI, SHR, SHRI</h3>
+    <h3 id="4-13-9"><a href="#4-13-9" class="heading-anchor">#</a> 4.13.9 SHL, SHLI, SHR, SHRI</h3>
     <p class="spec-status"><span class="status-done">Done</span> — 4B mode. .F, .CD supported</p>
     {['MSHL', 'MSHLI', 'MSHR', 'MSHRI'].map(id => {
       const w = getEncodingWavedrom('mencdec', id); const s = getMexecuteClause(id);
       return <div class="instruction-detail">{w && <script type="WaveDrom" set:html={w} />}{s && <div class="sail-code" set:text={s} />}</div>;
     })}
 
-    <h3>4.13.10 CONCAT</h3>
+    <h3 id="4-13-10"><a href="#4-13-10" class="heading-anchor">#</a> 4.13.10 CONCAT</h3>
     <p class="spec-status"><span class="status-done">Done</span> — .CD supported</p>
     {['MCONCAT'].map(id => {
       const w = getEncodingWavedrom('mencdec', id); const s = getMexecuteClause(id);
       return <div class="instruction-detail">{w && <script type="WaveDrom" set:html={w} />}{s && <div class="sail-code" set:text={s} />}</div>;
     })}
 
-    <h3>4.13.11 MOV, MOVI</h3>
+    <h3 id="4-13-11"><a href="#4-13-11" class="heading-anchor">#</a> 4.13.11 MOV, MOVI</h3>
     <p class="spec-status"><span class="status-done">Done</span> — .CD supported</p>
     {['MMOV', 'MMOVI'].map(id => {
       const w = getEncodingWavedrom('mencdec', id); const s = getMexecuteClause(id);
       return <div class="instruction-detail">{w && <script type="WaveDrom" set:html={w} />}{s && <div class="sail-code" set:text={s} />}</div>;
     })}
 
-    <h3>4.13.12 FFI</h3>
+    <h3 id="4-13-12"><a href="#4-13-12" class="heading-anchor">#</a> 4.13.12 FFI</h3>
     <p class="spec-status"><span class="status-done">Done</span> — .F supported</p>
     {['MFFI'].map(id => {
       const w = getEncodingWavedrom('mencdec', id); const s = getMexecuteClause(id);
       return <div class="instruction-detail">{w && <script type="WaveDrom" set:html={w} />}{s && <div class="sail-code" set:text={s} />}</div>;
     })}
 
-    <h3>4.13.13 LD, LDD, LDDI, LDH, LDS, LDSP, LDSPI</h3>
+    <h3 id="4-13-13"><a href="#4-13-13" class="heading-anchor">#</a> 4.13.13 LD, LDD, LDDI, LDH, LDS, LDSP, LDSPI</h3>
     <p class="spec-status"><span class="status-not-started">Not started</span> — Needs RAM/PMEM model</p>
 
-    <h3>4.13.14 ST, STD, STDI, STH, STS, STSP, STSPI</h3>
+    <h3 id="4-13-14"><a href="#4-13-14" class="heading-anchor">#</a> 4.13.14 ST, STD, STDI, STH, STS, STSP, STSPI</h3>
     <p class="spec-status"><span class="status-not-started">Not started</span> — Needs RAM/PMEM model</p>
 
-    <h3>4.13.15 JTL</h3>
+    <h3 id="4-13-15"><a href="#4-13-15" class="heading-anchor">#</a> 4.13.15 JTL</h3>
     <p class="spec-status"><span class="status-not-started">Not started</span></p>
 
-    <h3>4.13.16 CALL</h3>
+    <h3 id="4-13-16"><a href="#4-13-16" class="heading-anchor">#</a> 4.13.16 CALL</h3>
     <p class="spec-status"><span class="status-not-started">Not started</span></p>
 
-    <h3>4.13.17 RET</h3>
+    <h3 id="4-13-17"><a href="#4-13-17" class="heading-anchor">#</a> 4.13.17 RET</h3>
     <p class="spec-status"><span class="status-not-started">Not started</span></p>
 
-    <h3>4.13.18 BR, BRI, BRBTST</h3>
+    <h3 id="4-13-18"><a href="#4-13-18" class="heading-anchor">#</a> 4.13.18 BR, BRI, BRBTST</h3>
     <p class="spec-status"><span class="status-done">Done</span> — All 11 condition codes</p>
     {['MBR', 'MBRI', 'MBRBTST'].map(id => {
       const w = getEncodingWavedrom('mencdec', id); const s = getMexecuteClause(id);
       return <div class="instruction-detail">{w && <script type="WaveDrom" set:html={w} />}{s && <div class="sail-code" set:text={s} />}</div>;
     })}
 
-    <h3>4.13.19 HASH</h3>
+    <h3 id="4-13-19"><a href="#4-13-19" class="heading-anchor">#</a> 4.13.19 HASH</h3>
     <p class="spec-status"><span class="status-not-started">Not started</span> — Needs LFLAG</p>
 
-    <h3>4.13.20 LKP, LKPLPM, LKPT, LKPTI</h3>
+    <h3 id="4-13-20"><a href="#4-13-20" class="heading-anchor">#</a> 4.13.20 LKP, LKPLPM, LKPT, LKPTI</h3>
     <p class="spec-status"><span class="status-not-started">Not started</span> — Needs LFLAG, TCAM model</p>
 
-    <h3>4.13.21 SYNC, SYNCALL</h3>
+    <h3 id="4-13-21"><a href="#4-13-21" class="heading-anchor">#</a> 4.13.21 SYNC, SYNCALL</h3>
     <p class="spec-status"><span class="status-not-started">Not started</span> — Needs LFLAG</p>
 
-    <h3>4.13.22 HALT</h3>
+    <h3 id="4-13-22"><a href="#4-13-22" class="heading-anchor">#</a> 4.13.22 HALT</h3>
     <p class="spec-status"><span class="status-done">Done</span></p>
     {['MHALT'].map(id => {
       const w = getEncodingWavedrom('mencdec', id); const s = getMexecuteClause(id);
       return <div class="instruction-detail">{w && <script type="WaveDrom" set:html={w} />}{s && <div class="sail-code" set:text={s} />}</div>;
     })}
 
-    <h3>4.13.23–25 CP, CHKSUM, SEND</h3>
+    <h3 id="4-13-23-25"><a href="#4-13-23-25" class="heading-anchor">#</a> 4.13.23–25 CP, CHKSUM, SEND</h3>
     <p class="spec-status"><span class="status-not-started">Not started</span> — Needs frame memory model</p>
 
-    <h3>4.13.26–30 COUNTER, METER, CAS, BW, DLB</h3>
+    <h3 id="4-13-26-30"><a href="#4-13-26-30" class="heading-anchor">#</a> 4.13.26–30 COUNTER, METER, CAS, BW, DLB</h3>
     <p class="spec-status"><span class="status-not-started">Not started</span> — Atomic operations</p>
 
-    <h3>4.13.31–54 Misc (LDRTC..MCDONE)</h3>
+    <h3 id="4-13-31-54"><a href="#4-13-31-54" class="heading-anchor">#</a> 4.13.31–54 Misc (LDRTC..MCDONE)</h3>
     <p class="spec-status"><span class="status-not-started">Not started</span></p>
 
-    <h3>4.13.51 NOP</h3>
+    <h3 id="4-13-51"><a href="#4-13-51" class="heading-anchor">#</a> 4.13.51 NOP</h3>
     <p class="spec-status"><span class="status-done">Done</span></p>
     {['MNOP'].map(id => {
       const w = getEncodingWavedrom('mencdec', id); const s = getMexecuteClause(id);

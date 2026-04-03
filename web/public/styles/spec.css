@@ -24,6 +24,28 @@
   text-decoration: underline;
 }
 
+.heading-anchor {
+  color: var(--accent);
+  text-decoration: none;
+  opacity: 0;
+  font-weight: 400;
+  margin-left: -1.25em;
+  padding-right: 0.25em;
+  position: absolute;
+  transition: opacity 0.15s;
+}
+
+h2:hover .heading-anchor,
+h3:hover .heading-anchor {
+  opacity: 1;
+}
+
+.spec-page h2,
+.spec-page h3 {
+  position: relative;
+  padding-left: 1.25em;
+}
+
 .spec-page h2 {
   font-size: 1.5rem;
   margin-top: 2.5rem;
