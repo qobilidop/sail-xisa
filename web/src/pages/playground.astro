@@ -3,5 +3,6 @@ import Base from '../layouts/Base.astro';
 import Playground from '../components/Playground.svelte';
 ---
 <Base title="Playground">
+  <link slot="head" rel="stylesheet" href={`${import.meta.env.BASE_URL}/styles/playground.css`} />
   <Playground client:only="svelte" />
 </Base>

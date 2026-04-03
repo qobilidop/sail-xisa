@@ -82,9 +82,6 @@
   }
 </script>
 
-<svelte:head>
-  <link rel="stylesheet" href="/styles/playground.css" />
-</svelte:head>
 
 <div class="playground">
   <div class="panel-left">

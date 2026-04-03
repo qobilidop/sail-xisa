@@ -7,14 +7,15 @@ const { title } = Astro.props;
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{title} — XISA Playground</title>
-  <link rel="stylesheet" href="/styles/global.css" />
+  <link rel="stylesheet" href={`${import.meta.env.BASE_URL}/styles/global.css`} />
+  <slot name="head" />
 </head>
 <body>
   <nav class="site-nav">
-    <a href="/" class="nav-brand">XISA</a>
+    <a href={`${import.meta.env.BASE_URL}/`} class="nav-brand">XISA</a>
     <div class="nav-links">
-      <a href="/">Home</a>
-      <a href="/playground">Playground</a>
+      <a href={`${import.meta.env.BASE_URL}/`}>Home</a>
+      <a href={`${import.meta.env.BASE_URL}/playground`}>Playground</a>
     </div>
   </nav>
   <main>
