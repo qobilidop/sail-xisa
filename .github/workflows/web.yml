@@ -1,4 +1,4 @@
-name: Web Playground
+name: Web
 
 on:
   push:
