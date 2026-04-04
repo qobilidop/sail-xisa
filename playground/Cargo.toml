@@ -1,0 +1,16 @@
+[package]
+name = "xisa"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "xisa-asm"
+path = "src/bin/xisa-asm.rs"
+
+[[bin]]
+name = "xisa-sim"
+path = "src/bin/xisa-sim.rs"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
