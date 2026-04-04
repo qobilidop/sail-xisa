@@ -1,4 +1,4 @@
-import init, { Simulator } from '../../simulator/pkg/xisa_simulator.js';
+import init, { Simulator } from '../../wasm/pkg/xisa_wasm.js';
 
 let simulator: Simulator | null = null;
 let initialized = false;

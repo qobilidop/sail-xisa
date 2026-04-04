@@ -7,6 +7,7 @@ on:
       - 'model/**'
       - 'examples/**'
       - 'scripts/**'
+      - 'playground/**'
       - '.github/workflows/web.yml'
   pull_request:
     paths:
@@ -14,6 +15,7 @@ on:
       - 'model/**'
       - 'examples/**'
       - 'scripts/**'
+      - 'playground/**'
 
 jobs:
   test:
@@ -38,7 +40,8 @@ jobs:
           push: never
           runCmd: |
             bash scripts/generate-sail-doc.sh
-            cd web/simulator && cargo test && wasm-pack build --target web && cd ../..
+            cargo test -p xisa
+            cd web/wasm && wasm-pack build --target web && cd ../..
             cd web && npm ci && npx astro build
 
   deploy:
@@ -70,7 +73,7 @@ jobs:
           push: never
           runCmd: |
             bash scripts/generate-sail-doc.sh
-            cd web/simulator && wasm-pack build --target web && cd ../..
+            cd web/wasm && wasm-pack build --target web && cd ../..
             cd web && npm ci && npx astro build
 
       - name: Upload artifact
