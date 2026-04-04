@@ -1,0 +1,7 @@
+[workspace]
+members = ["playground", "web/wasm"]
+resolver = "2"
+
+[profile.release]
+opt-level = "s"
+lto = true
