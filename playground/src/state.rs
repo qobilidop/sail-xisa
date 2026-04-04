@@ -1,8 +1,24 @@
 use crate::types::Reg;
+use serde::Serialize;
+
+mod array_ser {
+    use serde::ser::{Serialize, Serializer, SerializeSeq};
+
+    pub fn serialize<S, T, const N: usize>(arr: &[T; N], serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+        T: Serialize,
+    {
+        let mut seq = serializer.serialize_seq(Some(N))?;
+        for item in arr {
+            seq.serialize_element(item)?;
+        }
+        seq.end()
+    }
+}
 
 /// Complete simulator state. Mirrors `model/parser/state.sail`.
-/// Not directly serializable (64-element arrays); use StateSnapshot in lib.rs for WASM.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct SimState {
     pub pc: u16,
     pub regs: [u128; 5],            // PR0-PR3 + PRN slot (PRN writes discarded)
@@ -12,7 +28,9 @@ pub struct SimState {
     pub parser_state: u8,
     pub packet_header: Vec<u8>,     // 256 bytes
     pub instruction_mem: Vec<u64>,
+    #[serde(with = "array_ser")]
     pub hdr_present: [bool; 32],
+    #[serde(with = "array_ser")]
     pub hdr_offset: [u8; 32],
     pub struct0: u128,
     pub halted: bool,
@@ -21,16 +39,27 @@ pub struct SimState {
     pub nxtp_result_pc: u16,
     pub nxtp_result_state: u8,
     pub nxtp_matched: bool,
+    #[serde(with = "array_ser")]
     pub tt_valid: [bool; 64],
+    #[serde(with = "array_ser")]
     pub tt_state: [u8; 64],
+    #[serde(with = "array_ser")]
     pub tt_key: [u32; 64],
+    #[serde(with = "array_ser")]
     pub tt_next_pc: [u16; 64],
+    #[serde(with = "array_ser")]
     pub tt_next_state: [u8; 64],
+    #[serde(with = "array_ser")]
     pub pseek_valid: [bool; 32],
+    #[serde(with = "array_ser")]
     pub pseek_class_id: [u8; 32],
+    #[serde(with = "array_ser")]
     pub pseek_protocol_value: [u16; 32],
+    #[serde(with = "array_ser")]
     pub pseek_hdr_length: [u8; 32],
+    #[serde(with = "array_ser")]
     pub pseek_next_proto_off: [u8; 32],
+    #[serde(with = "array_ser")]
     pub pseek_next_proto_size: [u8; 32],
     pub map_regs: [u128; 16],
 }
