@@ -3,3 +3,6 @@ build/
 
 # Sail SMT solver cache
 sail_smt_cache
+
+# Rust build artifacts
+target/
