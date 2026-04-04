@@ -1,35 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <gmp.h>
-#include "sail.h"
-#include "rts.h"
+
+// Include the Sail-generated header (provides all types, externs, and includes).
+#include "diff_model.h"
 
 // Forward declarations from Sail-generated code.
 void model_init(void);
 void model_fini(void);
 
-// Sail-generated functions.
-extern unit zparser_init(unit);
-extern unit zwrite_pimem_raw(sail_int, uint64_t);
-extern enum zExecutionResult zparser_run(unit);
-
-// Sail-generated register globals.
-extern zz5vecz8z5bvz9 zPR;
-extern uint64_t zppc;
-extern uint64_t zpcursor;
-extern bool zpflag_zz;
-extern bool zpflag_n;
-extern bool zparser_halted;
-extern bool zparser_drop;
-extern lbits zstruct0;
-extern zz5vecz8z5boolz9 zhdr_present;
-extern zz5vecz8z5bv8z9 zhdr_offset;
-extern zz5vecz8z5bv8z9 zpacket_hdr;
-
 // Print a 128-bit lbits value as a 0x-prefixed 32-digit hex string.
 static void print_lbits_hex(FILE *f, const lbits *val) {
-    char *str = mpz_get_str(NULL, 16, *val->bits);
+    char *str = mpz_get_str(NULL, 16, *(val->bits));
     size_t len = strlen(str);
     fprintf(f, "\"0x");
     for (size_t i = len; i < 32; i++) fprintf(f, "0");
@@ -98,19 +80,19 @@ int main(int argc, char *argv[]) {
 
     uint8_t buf[8];
     sail_int idx;
-    CREATE(sail_int)(&idx);
+    mpz_init(idx);
     int pc = 0;
     while (fread(buf, 1, 8, prog) == 8) {
         uint64_t word = 0;
         for (int i = 0; i < 8; i++) {
             word = (word << 8) | buf[i];
         }
-        mpz_set_si(*idx, pc);
+        mpz_set_si(idx, pc);
         zwrite_pimem_raw(idx, word);
         pc++;
     }
     fclose(prog);
-    KILL(sail_int)(&idx);
+    mpz_clear(idx);
 
     // Load packet data (optional).
     if (argc >= 3) {

@@ -87,3 +87,37 @@ add_sail_test(test_map_program test/map/test_program.sail)
 add_sail_test(test_map_shift test/map/test_shift.sail)
 add_sail_test(test_map_concat test/map/test_concat.sail)
 add_sail_test(test_map_ffi test/map/test_ffi.sail)
+
+# Differential testing harness
+# Compile model + dummy main to C, then link with our custom harness.c
+set(DIFF_SAIL_STEM "${CMAKE_CURRENT_BINARY_DIR}/diff_model")
+set(DIFF_C "${DIFF_SAIL_STEM}.c")
+
+add_custom_command(
+    OUTPUT ${DIFF_C}
+    COMMAND ${SAIL} -c
+        ${CMAKE_SOURCE_DIR}/model/main.sail
+        ${CMAKE_SOURCE_DIR}/test/diff/main.sail
+        -o ${DIFF_SAIL_STEM}
+    DEPENDS ${MODEL_SAIL_FILES} ${CMAKE_SOURCE_DIR}/test/diff/main.sail
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMENT "Compiling Sail model for diff testing harness..."
+)
+
+add_executable(sail-c-emu-harness
+    ${DIFF_C}
+    ${CMAKE_SOURCE_DIR}/test/diff/harness.c
+    ${SAIL_DIR}/lib/sail.c
+    ${SAIL_DIR}/lib/rts.c
+    ${SAIL_DIR}/lib/elf.c
+    ${SAIL_DIR}/lib/sail_failure.c
+)
+target_include_directories(sail-c-emu-harness PRIVATE
+    ${SAIL_DIR}/lib
+    ${CMAKE_CURRENT_BINARY_DIR}
+)
+target_link_libraries(sail-c-emu-harness PRIVATE gmp z)
+target_compile_options(sail-c-emu-harness PRIVATE -O2)
+# Rename the Sail-generated main() to avoid conflict with our harness main().
+# Only apply to the generated C file, not harness.c.
+set_source_files_properties(${DIFF_C} PROPERTIES COMPILE_DEFINITIONS "main=__sail_generated_main")
