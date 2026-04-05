@@ -5,8 +5,10 @@ use proptest::prelude::*;
 
 use xisa::assembler::assemble;
 use xisa::diff::DiffState;
+use xisa::encode::encode;
 use xisa::execute;
 use xisa::state::SimState;
+use xisa::types::*;
 
 /// Path to the Sail C emulator harness binary (relative to repo root).
 const HARNESS_PATH: &str = "build/test/sail-c-emu-harness";
@@ -116,19 +118,12 @@ fn diff_simple_halt() {
     diff_test("HALT", &[0u8; 256]);
 }
 
-// The following tests are ignored pending resolution of the bit-endianness
-// mismatch between Rust and Sail implementations.
-// Rust insert_bits uses big-endian (bit 0 = MSB), Sail uses little-endian (bit 0 = LSB).
-// Example: MOVI PR0, 42, 8 at offset 0 puts 0x2a at MSB in Rust, LSB in Sail.
-
 #[test]
-#[ignore = "bit-endianness mismatch: Rust big-endian vs Sail little-endian"]
 fn diff_movi_halt() {
     diff_test("MOVI PR0, 42, 8\nHALT", &[0u8; 256]);
 }
 
 #[test]
-#[ignore = "bit-endianness mismatch: Rust big-endian vs Sail little-endian"]
 fn diff_add_program() {
     diff_test(
         "MOVI PR0, 10, 8\nMOVI PR1, 20, 8\nADD PR2, PR0, PR1\nHALT",
@@ -137,7 +132,6 @@ fn diff_add_program() {
 }
 
 #[test]
-#[ignore = "bit-endianness mismatch: Rust big-endian vs Sail little-endian"]
 fn diff_branch_taken() {
     diff_test(
         "MOVI PR0, 5, 8\nMOVI PR1, 5, 8\nCMP PR0, PR1\nBR.EQ 6\nMOVI PR2, 255, 8\nHALT\nMOVI PR2, 170, 8\nHALT",
@@ -146,7 +140,6 @@ fn diff_branch_taken() {
 }
 
 #[test]
-#[ignore = "bit-endianness mismatch: Rust big-endian vs Sail little-endian"]
 fn diff_branch_not_taken() {
     diff_test(
         "MOVI PR0, 3, 8\nMOVI PR1, 5, 8\nCMP PR0, PR1\nBR.EQ 6\nMOVI PR2, 187, 8\nHALT\nMOVI PR2, 204, 8\nHALT",
@@ -155,7 +148,6 @@ fn diff_branch_not_taken() {
 }
 
 #[test]
-#[ignore = "bit-endianness mismatch: Rust big-endian vs Sail little-endian"]
 fn diff_counting_loop() {
     diff_test(
         "MOVI PR0, 3, 8\nSUBI PR0, PR0, 1\nCMP PR0, PR1\nBR.NEQ 1\nHALT",
@@ -164,7 +156,6 @@ fn diff_counting_loop() {
 }
 
 #[test]
-#[ignore = "bit-endianness mismatch: Rust big-endian vs Sail little-endian"]
 fn diff_haltdrop() {
     diff_test("MOVI PR0, 1, 8\nHALTDROP", &[0u8; 256]);
 }
@@ -174,7 +165,6 @@ fn diff_haltdrop() {
 // ---------------------------------------------------------------------------
 
 #[test]
-#[ignore = "bit-endianness mismatch: Rust big-endian vs Sail little-endian"]
 fn diff_ext_fixed_packet() {
     let mut packet = [0u8; 256];
     packet[0] = 0x45;
@@ -189,14 +179,12 @@ fn diff_ext_fixed_packet() {
 // ---------------------------------------------------------------------------
 
 #[test]
-#[ignore = "bit-endianness mismatch: Rust big-endian vs Sail little-endian"]
 fn diff_example_simple_branch() {
     let source = include_str!("../examples/simple-branch.xisa");
     diff_test(source, &[0u8; 256]);
 }
 
 #[test]
-#[ignore = "bit-endianness mismatch: Rust big-endian vs Sail little-endian"]
 fn diff_example_extract_ipv4() {
     let source = include_str!("../examples/extract-ipv4.xisa");
     let mut packet = [0u8; 256];
@@ -217,6 +205,427 @@ fn diff_example_extract_ipv4() {
 }
 
 // ---------------------------------------------------------------------------
+// Binary-level diff test helper (for instructions the assembler doesn't support)
+// ---------------------------------------------------------------------------
+
+/// Encode a list of instructions, run on both simulators, compare.
+fn diff_test_instrs(instrs: &[Instruction], packet: &[u8]) {
+    if !harness_available() {
+        eprintln!("Skipping diff test: sail-c-emu-harness not found at {}", HARNESS_PATH);
+        return;
+    }
+
+    let mut bytes = Vec::new();
+    for inst in instrs {
+        bytes.extend_from_slice(&encode(inst).to_be_bytes());
+    }
+
+    let rust_state = run_rust(&bytes, packet);
+    let sail_state = run_sail(&bytes, packet);
+
+    assert_eq!(
+        rust_state, sail_state,
+        "Rust and Sail states differ!\nRust: {}\nSail: {}",
+        serde_json::to_string_pretty(&rust_state).unwrap(),
+        serde_json::to_string_pretty(&sail_state).unwrap(),
+    );
+}
+
+// ---------------------------------------------------------------------------
+// Data movement tests
+// ---------------------------------------------------------------------------
+
+#[test]
+fn diff_mov_register_copy() {
+    diff_test(
+        "MOVI PR0, 0xABCD, 16\nMOV PR1, PR0\nHALT",
+        &[0u8; 256],
+    );
+}
+
+#[test]
+fn diff_movi_nonzero_offset() {
+    // MOVI with byte offset 2 → bit offset 16
+    diff_test(
+        "MOVI PR0.2, 0xFF, 8\nHALT",
+        &[0u8; 256],
+    );
+}
+
+#[test]
+fn diff_movi_clear_dest() {
+    // Set PR0, then overwrite with .CD
+    diff_test(
+        "MOVI PR0, 0xFFFF, 16\nMOVI.CD PR0, 42, 8\nHALT",
+        &[0u8; 256],
+    );
+}
+
+#[test]
+fn diff_ext_clear_dest() {
+    let mut packet = [0u8; 256];
+    packet[0] = 0xAB;
+    diff_test(
+        "MOVI PR0, 0xFFFF, 16\nEXT.CD PR0, 0, 8\nHALT",
+        &packet,
+    );
+}
+
+#[test]
+fn diff_ext_with_nonzero_cursor() {
+    let mut packet = [0u8; 256];
+    packet[10] = 0xDE;
+    packet[11] = 0xAD;
+    diff_test(
+        "STCI 10\nEXT PR0, 0, 16\nHALT",
+        &packet,
+    );
+}
+
+// ---------------------------------------------------------------------------
+// Arithmetic tests
+// ---------------------------------------------------------------------------
+
+#[test]
+fn diff_addi() {
+    diff_test(
+        "MOVI PR0, 100, 8\nADDI PR1, PR0, 55\nHALT",
+        &[0u8; 256],
+    );
+}
+
+#[test]
+fn diff_addi_overflow() {
+    // 200 + 200 = 400, but in 8-bit → 144 (wraps), should set neither Z nor N
+    diff_test_instrs(&[
+        Instruction::Movi { rd: Reg::PR0, doff: 0, imm: 200, size: 8, cd: false },
+        Instruction::AddI { rd: Reg::PR1, rs: Reg::PR0, imm: 200, size: 8, cd: false },
+        Instruction::Halt { drop: false },
+    ], &[0u8; 256]);
+}
+
+#[test]
+fn diff_subi_to_zero() {
+    diff_test(
+        "MOVI PR0, 42, 8\nSUBI PR1, PR0, 42\nHALT",
+        &[0u8; 256],
+    );
+}
+
+#[test]
+fn diff_subi_negative() {
+    diff_test(
+        "MOVI PR0, 5, 8\nSUBI PR1, PR0, 10\nHALT",
+        &[0u8; 256],
+    );
+}
+
+#[test]
+fn diff_sub_registers() {
+    diff_test(
+        "MOVI PR0, 100, 8\nMOVI PR1, 30, 8\nSUB PR2, PR0, PR1\nHALT",
+        &[0u8; 256],
+    );
+}
+
+// ---------------------------------------------------------------------------
+// Logic tests
+// ---------------------------------------------------------------------------
+
+#[test]
+fn diff_and() {
+    diff_test(
+        "MOVI PR0, 0xFF, 8\nMOVI PR1, 0x0F, 8\nAND PR2, PR0, PR1\nHALT",
+        &[0u8; 256],
+    );
+}
+
+#[test]
+fn diff_and_zero_flag() {
+    diff_test(
+        "MOVI PR0, 0xF0, 8\nMOVI PR1, 0x0F, 8\nAND PR2, PR0, PR1\nHALT",
+        &[0u8; 256],
+    );
+}
+
+#[test]
+fn diff_or() {
+    diff_test(
+        "MOVI PR0, 0xA0, 8\nMOVI PR1, 0x05, 8\nOR PR2, PR0, PR1\nHALT",
+        &[0u8; 256],
+    );
+}
+
+// ---------------------------------------------------------------------------
+// Branch tests
+// ---------------------------------------------------------------------------
+
+#[test]
+fn diff_brbtst_set() {
+    // Set bit 0 of PR0 (value 1), then branch if bit 0 is set
+    diff_test(
+        "MOVI PR0, 1, 8\nBRBTST SET, PR0.0, 3\nHALT\nMOVI PR1, 99, 8\nHALT",
+        &[0u8; 256],
+    );
+}
+
+#[test]
+fn diff_brbtst_clear() {
+    // PR0 = 0, branch if bit 0 is clear
+    diff_test(
+        "BRBTST CLR, PR0.0, 2\nHALT\nMOVI PR1, 77, 8\nHALT",
+        &[0u8; 256],
+    );
+}
+
+#[test]
+fn diff_branch_lt() {
+    diff_test(
+        "MOVI PR0, 3, 8\nMOVI PR1, 5, 8\nCMP PR0, PR1\nBR.LT 6\nMOVI PR2, 0, 8\nHALT\nMOVI PR2, 1, 8\nHALT",
+        &[0u8; 256],
+    );
+}
+
+#[test]
+fn diff_branch_gt() {
+    diff_test(
+        "MOVI PR0, 10, 8\nMOVI PR1, 3, 8\nCMP PR0, PR1\nBR.GT 6\nMOVI PR2, 0, 8\nHALT\nMOVI PR2, 1, 8\nHALT",
+        &[0u8; 256],
+    );
+}
+
+// ---------------------------------------------------------------------------
+// Header / cursor tests
+// ---------------------------------------------------------------------------
+
+#[test]
+fn diff_sth() {
+    diff_test(
+        "STCI 20\nSTH 5, 5\nHALT",
+        &[0u8; 256],
+    );
+}
+
+#[test]
+fn diff_sth_different_pid_oid() {
+    diff_test(
+        "STCI 14\nSTH 3, 7\nHALT",
+        &[0u8; 256],
+    );
+}
+
+#[test]
+fn diff_stch() {
+    // STCH: cursor += incr, then set header at new cursor position
+    diff_test_instrs(&[
+        Instruction::Stch { incr: 20, pid: 2, oid: 2, halt: false },
+        Instruction::Halt { drop: false },
+    ], &[0u8; 256]);
+}
+
+#[test]
+fn diff_sthc() {
+    // STHC: set header at current cursor, then cursor += incr
+    diff_test_instrs(&[
+        Instruction::Stci { incr: 10 },
+        Instruction::Sthc { incr: 5, pid: 1, oid: 1 },
+        Instruction::Halt { drop: false },
+    ], &[0u8; 256]);
+}
+
+#[test]
+fn diff_sth_with_halt() {
+    diff_test_instrs(&[
+        Instruction::Stci { incr: 14 },
+        Instruction::Sth { pid: 0, oid: 0, halt: true },
+    ], &[0u8; 256]);
+}
+
+#[test]
+fn diff_stc() {
+    // STC: cursor += (reg_slice + incr) << shift
+    diff_test_instrs(&[
+        Instruction::Movi { rd: Reg::PR0, doff: 0, imm: 5, size: 8, cd: false },
+        Instruction::Stc { rs: Reg::PR0, soff: 0, ssz: 8, shift: 1, incr: 2 },
+        Instruction::Halt { drop: false },
+    ], &[0u8; 256]);
+}
+
+// ---------------------------------------------------------------------------
+// Store to struct-0 tests
+// ---------------------------------------------------------------------------
+
+#[test]
+fn diff_st() {
+    diff_test_instrs(&[
+        Instruction::Movi { rd: Reg::PR0, doff: 0, imm: 0xBEEF, size: 16, cd: false },
+        Instruction::St { rs: Reg::PR0, soff: 0, doff: 0, size: 16, halt: false },
+        Instruction::Halt { drop: false },
+    ], &[0u8; 256]);
+}
+
+#[test]
+fn diff_st_with_offset() {
+    diff_test_instrs(&[
+        Instruction::Movi { rd: Reg::PR0, doff: 0, imm: 0xFF, size: 8, cd: false },
+        Instruction::St { rs: Reg::PR0, soff: 0, doff: 16, size: 8, halt: false },
+        Instruction::Halt { drop: false },
+    ], &[0u8; 256]);
+}
+
+#[test]
+fn diff_st_with_halt() {
+    diff_test_instrs(&[
+        Instruction::Movi { rd: Reg::PR0, doff: 0, imm: 42, size: 8, cd: false },
+        Instruction::St { rs: Reg::PR0, soff: 0, doff: 0, size: 8, halt: true },
+    ], &[0u8; 256]);
+}
+
+#[test]
+fn diff_sti() {
+    diff_test_instrs(&[
+        Instruction::StI { imm: 0xCAFE, doff: 0, size: 16 },
+        Instruction::Halt { drop: false },
+    ], &[0u8; 256]);
+}
+
+#[test]
+fn diff_sti_with_offset() {
+    diff_test_instrs(&[
+        Instruction::StI { imm: 0xAB, doff: 32, size: 8 },
+        Instruction::Halt { drop: false },
+    ], &[0u8; 256]);
+}
+
+// ---------------------------------------------------------------------------
+// Compare instruction variants
+// ---------------------------------------------------------------------------
+
+#[test]
+fn diff_cmpiby() {
+    // CmpIBy: byte-offset compare
+    diff_test_instrs(&[
+        Instruction::Movi { rd: Reg::PR0, doff: 0, imm: 42, size: 8, cd: false },
+        Instruction::CmpIBy { rs: Reg::PR0, soff: 0, imm: 42, size: 8 },
+        Instruction::Halt { drop: false },
+    ], &[0u8; 256]);
+}
+
+#[test]
+fn diff_cmpibi() {
+    // CmpIBi: bit-offset compare
+    diff_test_instrs(&[
+        Instruction::Movi { rd: Reg::PR0, doff: 0, imm: 100, size: 8, cd: false },
+        Instruction::CmpIBi { rs: Reg::PR0, soff: 0, imm: 50, size: 8 },
+        Instruction::Halt { drop: false },
+    ], &[0u8; 256]);
+}
+
+// ---------------------------------------------------------------------------
+// Concatenation tests
+// ---------------------------------------------------------------------------
+
+#[test]
+fn diff_cnct_by() {
+    // CnctBy: concatenate two byte-aligned register slices
+    diff_test_instrs(&[
+        Instruction::Movi { rd: Reg::PR0, doff: 0, imm: 0xAB, size: 8, cd: false },
+        Instruction::Movi { rd: Reg::PR1, doff: 0, imm: 0xCD, size: 8, cd: false },
+        Instruction::CnctBy {
+            rd: Reg::PR2, doff: 0,
+            rs1: Reg::PR0, s1off: 0, s1sz: 1,  // 1 byte
+            rs2: Reg::PR1, s2off: 0, s2sz: 1,  // 1 byte
+            cd: true,
+        },
+        Instruction::Halt { drop: false },
+    ], &[0u8; 256]);
+}
+
+#[test]
+fn diff_cnct_bi() {
+    // CnctBi: concatenate two bit-level register slices
+    diff_test_instrs(&[
+        Instruction::Movi { rd: Reg::PR0, doff: 0, imm: 0x0F, size: 8, cd: false },
+        Instruction::Movi { rd: Reg::PR1, doff: 0, imm: 0x03, size: 8, cd: false },
+        Instruction::CnctBi {
+            rd: Reg::PR2, doff: 0,
+            rs1: Reg::PR0, s1off: 0, s1sz: 4,  // 4 bits
+            rs2: Reg::PR1, s2off: 0, s2sz: 2,  // 2 bits
+            cd: true,
+        },
+        Instruction::Halt { drop: false },
+    ], &[0u8; 256]);
+}
+
+// ---------------------------------------------------------------------------
+// SubII test (imm - reg)
+// ---------------------------------------------------------------------------
+
+#[test]
+fn diff_subii() {
+    diff_test_instrs(&[
+        Instruction::Movi { rd: Reg::PR0, doff: 0, imm: 30, size: 8, cd: false },
+        Instruction::SubII { rd: Reg::PR1, imm: 100, rs: Reg::PR0, size: 8, cd: true },
+        Instruction::Halt { drop: false },
+    ], &[0u8; 256]);
+}
+
+// ---------------------------------------------------------------------------
+// AndI / OrI tests
+// ---------------------------------------------------------------------------
+
+#[test]
+fn diff_andi() {
+    diff_test_instrs(&[
+        Instruction::Movi { rd: Reg::PR0, doff: 0, imm: 0xFF, size: 8, cd: false },
+        Instruction::AndI { rd: Reg::PR1, rs: Reg::PR0, imm: 0x0F, size: 8, cd: true },
+        Instruction::Halt { drop: false },
+    ], &[0u8; 256]);
+}
+
+#[test]
+fn diff_ori() {
+    diff_test_instrs(&[
+        Instruction::Movi { rd: Reg::PR0, doff: 0, imm: 0xA0, size: 8, cd: false },
+        Instruction::OrI { rd: Reg::PR1, rs: Reg::PR0, imm: 0x05, size: 8, cd: true },
+        Instruction::Halt { drop: false },
+    ], &[0u8; 256]);
+}
+
+// ---------------------------------------------------------------------------
+// Multi-instruction integration tests
+// ---------------------------------------------------------------------------
+
+#[test]
+fn diff_extract_and_store() {
+    // Extract from packet, store to struct0
+    let mut packet = [0u8; 256];
+    packet[0] = 0x45;
+    packet[1] = 0x00;
+    packet[9] = 0x06;
+    diff_test_instrs(&[
+        Instruction::Ext { rd: Reg::PR0, doff: 0, soff: 0, size: 8, cd: true },
+        Instruction::St { rs: Reg::PR0, soff: 0, doff: 0, size: 8, halt: false },
+        Instruction::Ext { rd: Reg::PR1, doff: 0, soff: 72, size: 8, cd: true },
+        Instruction::St { rs: Reg::PR1, soff: 0, doff: 8, size: 8, halt: false },
+        Instruction::Stci { incr: 20 },
+        Instruction::Sth { pid: 0, oid: 0, halt: true },
+    ], &packet);
+}
+
+#[test]
+fn diff_multi_header_layers() {
+    // Simulate two protocol headers: set header, advance cursor, set header again
+    diff_test_instrs(&[
+        Instruction::Sth { pid: 0, oid: 0, halt: false },
+        Instruction::Stci { incr: 14 },
+        Instruction::Sth { pid: 1, oid: 1, halt: false },
+        Instruction::Stci { incr: 20 },
+        Instruction::Halt { drop: false },
+    ], &[0u8; 256]);
+}
+
+// ---------------------------------------------------------------------------
 // Proptest packet fuzzing
 // ---------------------------------------------------------------------------
 
@@ -224,11 +633,8 @@ fn arb_packet() -> impl Strategy<Value = Vec<u8>> {
     proptest::collection::vec(any::<u8>(), 256)
 }
 
-// Proptest packet fuzzing — ignored pending endianness fix.
-// To run: cargo test --test diff_test -- --ignored
 proptest! {
     #[test]
-    #[ignore = "bit-endianness mismatch: Rust big-endian vs Sail little-endian"]
     fn diff_ext_fuzz_packet(packet in arb_packet()) {
         if !harness_available() {
             return Ok(());
@@ -237,7 +643,6 @@ proptest! {
     }
 
     #[test]
-    #[ignore = "bit-endianness mismatch: Rust big-endian vs Sail little-endian"]
     fn diff_ext_with_cursor_fuzz(packet in arb_packet()) {
         if !harness_available() {
             return Ok(());

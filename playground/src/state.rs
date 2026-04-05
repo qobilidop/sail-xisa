@@ -144,10 +144,10 @@ impl SimState {
 // Bit manipulation helpers
 // ---------------------------------------------------------------------------
 //
-// Big-endian convention: bit 0 = MSB (most significant bit) of the 128-bit
-// value, bit 127 = LSB. This matches the Sail model.
+// Little-endian bit numbering: bit 0 = LSB, bit 127 = MSB.
+// This matches the Sail model (see model/parser/state.sail).
 
-/// Extract `size` bits starting at bit position `offset` (big-endian, 0 = MSB).
+/// Extract `size` bits starting at bit position `offset` (0 = LSB).
 ///
 /// Returns the extracted value right-aligned (zero-extended).
 ///
@@ -162,17 +162,15 @@ pub fn extract_bits(val: u128, offset: u8, size: u8) -> u128 {
     if size == 0 {
         return 0;
     }
-    // Shift the bits of interest to the LSB position, then mask.
-    let shift = 128u32 - (offset as u32) - (size as u32);
     let mask = if size == 128 {
         u128::MAX
     } else {
         (1u128 << size) - 1
     };
-    (val >> shift) & mask
+    (val >> (offset as u32)) & mask
 }
 
-/// Insert `size` bits of `data` at bit position `offset` (big-endian, 0 = MSB).
+/// Insert `size` bits of `data` at bit position `offset` (0 = LSB).
 ///
 /// Returns the modified value with all other bits preserved.
 ///
@@ -187,14 +185,12 @@ pub fn insert_bits(val: u128, offset: u8, size: u8, data: u128) -> u128 {
     if size == 0 {
         return val;
     }
-    let shift = 128u32 - (offset as u32) - (size as u32);
     let mask: u128 = if size == 128 {
         u128::MAX
     } else {
         (1u128 << size) - 1
     };
-    // Clear the target bits, then OR in the new data.
-    (val & !(mask << shift)) | ((data & mask) << shift)
+    (val & !(mask << (offset as u32))) | ((data & mask) << (offset as u32))
 }
 
 /// Extract bits from a packet header buffer at a bit offset relative to cursor.
@@ -232,17 +228,17 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_extract_bits_msb() {
-        // Place 0xFF in the top byte of a u128 (bits 0..8).
-        let val: u128 = 0xFFu128 << 120;
+    fn test_extract_bits_lsb() {
+        // Place 0xFF in the low byte (bits 0..8).
+        let val: u128 = 0xFF;
         let extracted = extract_bits(val, 0, 8);
-        assert_eq!(extracted, 0xFF, "Expected 0xFF from top byte");
+        assert_eq!(extracted, 0xFF, "Expected 0xFF from low byte");
     }
 
     #[test]
     fn test_extract_bits_middle() {
-        // Place 0xABCD in bits 8..24 (i.e. the second and third bytes).
-        let val: u128 = 0xABCDu128 << (128 - 8 - 16);
+        // Place 0xABCD in bits 8..24.
+        let val: u128 = 0xABCDu128 << 8;
         let extracted = extract_bits(val, 8, 16);
         assert_eq!(extracted, 0xABCD, "Expected 0xABCD from bits 8..24");
     }
@@ -251,8 +247,8 @@ mod tests {
     fn test_insert_bits() {
         let val: u128 = 0;
         let result = insert_bits(val, 0, 8, 0xBE);
-        // 0xBE should appear in bits 0..8 (top byte).
-        assert_eq!(result, 0xBEu128 << 120);
+        // 0xBE should appear in the low byte.
+        assert_eq!(result, 0xBEu128);
     }
 
     #[test]
@@ -261,7 +257,7 @@ mod tests {
         let val: u128 = u128::MAX;
         let result = insert_bits(val, 8, 8, 0x00);
         // Bit range 8..16 should be 0, rest 1.
-        let expected = u128::MAX & !(0xFFu128 << 112);
+        let expected = u128::MAX & !(0xFFu128 << 8);
         assert_eq!(result, expected, "Insert zeros should clear bits 8..16 only");
     }
 

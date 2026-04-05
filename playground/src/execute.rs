@@ -109,7 +109,8 @@ pub fn execute(state: &mut SimState, inst: &Instruction) -> ExecResult {
 
         Instruction::Movi { rd, doff, imm, size, cd } => {
             maybe_clear(state, *rd, *cd);
-            let val = insert_bits(state.read_reg(*rd), *doff, *size, *imm as u128);
+            // doff is a byte offset in the encoding; convert to bits (matches Sail PMOVI).
+            let val = insert_bits(state.read_reg(*rd), doff.wrapping_mul(8), *size, *imm as u128);
             state.write_reg(*rd, val);
             ExecResult::Success
         }
@@ -405,10 +406,13 @@ pub fn execute(state: &mut SimState, inst: &Instruction) -> ExecResult {
 
         // -- Header / Cursor --
         Instruction::Sth { pid, oid, halt } => {
-            let idx = *pid as usize;
-            if idx < 32 {
-                state.hdr_present[idx] = true;
-                state.hdr_offset[idx] = *oid;
+            let pid_idx = *pid as usize;
+            let oid_idx = *oid as usize;
+            if pid_idx < 32 {
+                state.hdr_present[pid_idx] = true;
+            }
+            if oid_idx < 32 {
+                state.hdr_offset[oid_idx] = state.cursor;
             }
             if *halt {
                 state.halted = true;
@@ -431,10 +435,13 @@ pub fn execute(state: &mut SimState, inst: &Instruction) -> ExecResult {
 
         Instruction::Stch { incr, pid, oid, halt } => {
             state.cursor = state.cursor.wrapping_add(*incr as u8);
-            let idx = *pid as usize;
-            if idx < 32 {
-                state.hdr_present[idx] = true;
-                state.hdr_offset[idx] = *oid;
+            let pid_idx = *pid as usize;
+            let oid_idx = *oid as usize;
+            if pid_idx < 32 {
+                state.hdr_present[pid_idx] = true;
+            }
+            if oid_idx < 32 {
+                state.hdr_offset[oid_idx] = state.cursor;
             }
             if *halt {
                 state.halted = true;
@@ -444,10 +451,13 @@ pub fn execute(state: &mut SimState, inst: &Instruction) -> ExecResult {
         }
 
         Instruction::Sthc { incr, pid, oid } => {
-            let idx = *pid as usize;
-            if idx < 32 {
-                state.hdr_present[idx] = true;
-                state.hdr_offset[idx] = *oid;
+            let pid_idx = *pid as usize;
+            let oid_idx = *oid as usize;
+            if pid_idx < 32 {
+                state.hdr_present[pid_idx] = true;
+            }
+            if oid_idx < 32 {
+                state.hdr_offset[oid_idx] = state.cursor;
             }
             state.cursor = state.cursor.wrapping_add(*incr as u8);
             ExecResult::Success
@@ -798,6 +808,7 @@ mod tests {
     #[test]
     fn test_sth_sets_header() {
         let mut state = SimState::new();
+        state.cursor = 14;
         execute(
             &mut state,
             &Instruction::Sth {
@@ -807,7 +818,8 @@ mod tests {
             },
         );
         assert!(state.hdr_present[3]);
-        assert_eq!(state.hdr_offset[3], 10);
+        // oid is an index; the stored value is the current cursor
+        assert_eq!(state.hdr_offset[10], 14);
         assert!(!state.halted);
     }
 
