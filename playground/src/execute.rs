@@ -110,7 +110,7 @@ pub fn execute(state: &mut SimState, inst: &Instruction) -> ExecResult {
         Instruction::Movi { rd, doff, imm, size, cd } => {
             maybe_clear(state, *rd, *cd);
             // doff is a byte offset in the encoding; convert to bits (matches Sail PMOVI).
-            let val = insert_bits(state.read_reg(*rd), doff.wrapping_mul(8), *size, *imm as u128);
+            let val = insert_bits(state.read_reg(*rd), (*doff as u16) * 8, *size, *imm as u128);
             state.write_reg(*rd, val);
             ExecResult::Success
         }
@@ -126,7 +126,7 @@ pub fn execute(state: &mut SimState, inst: &Instruction) -> ExecResult {
         Instruction::ExtNxtp { rd, soff, size, cd } => {
             maybe_clear(state, *rd, *cd);
             let data = extract_packet_bits(&state.packet_header, state.cursor, *soff, *size);
-            let val = insert_bits(state.read_reg(*rd), 0, *size, data);
+            let val = insert_bits(state.read_reg(*rd), 0u8, *size, data);
             state.write_reg(*rd, val);
             nxtp_lookup(state, data as u32);
             ExecResult::Success
@@ -135,8 +135,8 @@ pub fn execute(state: &mut SimState, inst: &Instruction) -> ExecResult {
         Instruction::MovL { rd, rs1, o1, sz1, rs2, o2, sz2, cd } => {
             maybe_clear(state, *rd, *cd);
             let data = extract_bits(state.read_reg(*rs1), *o1, *sz1);
-            let offset_val = extract_bits(state.read_reg(*rs2), *o2, *sz2) as u8;
-            let dest_off = o1.wrapping_add(offset_val);
+            let offset_val = extract_bits(state.read_reg(*rs2), *o2, *sz2) as u16;
+            let dest_off = (*o1 as u16) + offset_val;
             let val = insert_bits(state.read_reg(*rd), dest_off, *sz1, data);
             state.write_reg(*rd, val);
             ExecResult::Success
@@ -145,7 +145,7 @@ pub fn execute(state: &mut SimState, inst: &Instruction) -> ExecResult {
         Instruction::MovLI { rd, rs, off, size, imm, cd } => {
             maybe_clear(state, *rd, *cd);
             let data = extract_bits(state.read_reg(*rs), *off, *size);
-            let dest_off = off.wrapping_add(*imm);
+            let dest_off = (*off as u16) + (*imm as u16);
             let val = insert_bits(state.read_reg(*rd), dest_off, *size, data);
             state.write_reg(*rd, val);
             ExecResult::Success
@@ -153,9 +153,9 @@ pub fn execute(state: &mut SimState, inst: &Instruction) -> ExecResult {
 
         Instruction::MovLII { rd, rs, off, size, imm, isz, cd } => {
             maybe_clear(state, *rd, *cd);
-            let data = extract_bits(state.read_reg(*rs), *off, *size);
-            let dest_off = off.wrapping_add(*imm);
-            let val = insert_bits(state.read_reg(*rd), dest_off, *isz, data);
+            // k = register sub-field value (dynamic dest offset)
+            let k = extract_bits(state.read_reg(*rs), *off, *size) as u16;
+            let val = insert_bits(state.read_reg(*rd), k, *isz, *imm as u128);
             state.write_reg(*rd, val);
             ExecResult::Success
         }
@@ -163,8 +163,8 @@ pub fn execute(state: &mut SimState, inst: &Instruction) -> ExecResult {
         Instruction::MovR { rd, rs1, o1, sz1, rs2, o2, sz2, cd } => {
             maybe_clear(state, *rd, *cd);
             let data = extract_bits(state.read_reg(*rs1), *o1, *sz1);
-            let offset_val = extract_bits(state.read_reg(*rs2), *o2, *sz2) as u8;
-            let dest_off = o1.saturating_sub(offset_val);
+            let offset_val = extract_bits(state.read_reg(*rs2), *o2, *sz2) as i32;
+            let dest_off = ((*o1 as i32) - offset_val).max(0) as u16;
             let val = insert_bits(state.read_reg(*rd), dest_off, *sz1, data);
             state.write_reg(*rd, val);
             ExecResult::Success
@@ -173,7 +173,7 @@ pub fn execute(state: &mut SimState, inst: &Instruction) -> ExecResult {
         Instruction::MovRI { rd, rs, off, size, imm, cd } => {
             maybe_clear(state, *rd, *cd);
             let data = extract_bits(state.read_reg(*rs), *off, *size);
-            let dest_off = off.saturating_sub(*imm);
+            let dest_off = ((*off as i32) - (*imm as i32)).max(0) as u16;
             let val = insert_bits(state.read_reg(*rd), dest_off, *size, data);
             state.write_reg(*rd, val);
             ExecResult::Success
@@ -181,9 +181,13 @@ pub fn execute(state: &mut SimState, inst: &Instruction) -> ExecResult {
 
         Instruction::MovRII { rd, rs, off, size, imm, isz, cd } => {
             maybe_clear(state, *rd, *cd);
-            let data = extract_bits(state.read_reg(*rs), *off, *size);
-            let dest_off = off.saturating_sub(*imm);
-            let val = insert_bits(state.read_reg(*rd), dest_off, *isz, data);
+            // reg_offset = register sub-field value
+            let reg_offset = extract_bits(state.read_reg(*rs), *off, *size) as u8;
+            // data_size = imm_value_size - reg_offset, clamped to 0
+            let data_size = (*isz as i16 - reg_offset as i16).max(0) as u8;
+            // Extract from immediate starting at bit reg_offset
+            let extracted = extract_bits(*imm as u128, reg_offset, data_size);
+            let val = insert_bits(state.read_reg(*rd), 0u8, data_size, extracted);
             state.write_reg(*rd, val);
             ExecResult::Success
         }
@@ -201,11 +205,11 @@ pub fn execute(state: &mut SimState, inst: &Instruction) -> ExecResult {
         }
 
         Instruction::AddI { rd, rs, imm, size, cd } => {
-            let a = extract_bits(state.read_reg(*rs), 0, *size);
+            let a = extract_bits(state.read_reg(*rs), 0u8, *size);
             let result = (a.wrapping_add(*imm as u128)) & size_mask(*size);
             state.flag_z = result == 0;
             maybe_clear(state, *rd, *cd);
-            let val = insert_bits(state.read_reg(*rd), 0, *size, result);
+            let val = insert_bits(state.read_reg(*rd), 0u8, *size, result);
             state.write_reg(*rd, val);
             ExecResult::Success
         }
@@ -223,23 +227,23 @@ pub fn execute(state: &mut SimState, inst: &Instruction) -> ExecResult {
         }
 
         Instruction::SubI { rd, rs, imm, size, cd } => {
-            let a = extract_bits(state.read_reg(*rs), 0, *size);
+            let a = extract_bits(state.read_reg(*rs), 0u8, *size);
             let result = (a.wrapping_sub(*imm as u128)) & size_mask(*size);
             state.flag_z = result == 0;
             state.flag_n = if *size > 0 { (result >> (*size - 1)) & 1 == 1 } else { false };
             maybe_clear(state, *rd, *cd);
-            let val = insert_bits(state.read_reg(*rd), 0, *size, result);
+            let val = insert_bits(state.read_reg(*rd), 0u8, *size, result);
             state.write_reg(*rd, val);
             ExecResult::Success
         }
 
         Instruction::SubII { rd, imm, rs, size, cd } => {
-            let b = extract_bits(state.read_reg(*rs), 0, *size);
+            let b = extract_bits(state.read_reg(*rs), 0u8, *size);
             let result = ((*imm as u128).wrapping_sub(b)) & size_mask(*size);
             state.flag_z = result == 0;
             state.flag_n = if *size > 0 { (result >> (*size - 1)) & 1 == 1 } else { false };
             maybe_clear(state, *rd, *cd);
-            let val = insert_bits(state.read_reg(*rd), 0, *size, result);
+            let val = insert_bits(state.read_reg(*rd), 0u8, *size, result);
             state.write_reg(*rd, val);
             ExecResult::Success
         }
@@ -257,11 +261,11 @@ pub fn execute(state: &mut SimState, inst: &Instruction) -> ExecResult {
         }
 
         Instruction::AndI { rd, rs, imm, size, cd } => {
-            let a = extract_bits(state.read_reg(*rs), 0, *size);
+            let a = extract_bits(state.read_reg(*rs), 0u8, *size);
             let result = a & (*imm as u128);
             state.flag_z = result == 0;
             maybe_clear(state, *rd, *cd);
-            let val = insert_bits(state.read_reg(*rd), 0, *size, result);
+            let val = insert_bits(state.read_reg(*rd), 0u8, *size, result);
             state.write_reg(*rd, val);
             ExecResult::Success
         }
@@ -278,11 +282,11 @@ pub fn execute(state: &mut SimState, inst: &Instruction) -> ExecResult {
         }
 
         Instruction::OrI { rd, rs, imm, size, cd } => {
-            let a = extract_bits(state.read_reg(*rs), 0, *size);
+            let a = extract_bits(state.read_reg(*rs), 0u8, *size);
             let result = a | (*imm as u128);
             state.flag_z = result == 0;
             maybe_clear(state, *rd, *cd);
-            let val = insert_bits(state.read_reg(*rd), 0, *size, result);
+            let val = insert_bits(state.read_reg(*rd), 0u8, *size, result);
             state.write_reg(*rd, val);
             ExecResult::Success
         }
@@ -298,7 +302,7 @@ pub fn execute(state: &mut SimState, inst: &Instruction) -> ExecResult {
         }
 
         Instruction::CmpIBy { rs, soff, imm, size } => {
-            let bit_off = (*soff as u8).wrapping_mul(8);
+            let bit_off = (*soff as u16) * 8;
             let a = extract_bits(state.read_reg(*rs), bit_off, *size);
             let result = (a.wrapping_sub(*imm as u128)) & size_mask(*size);
             state.flag_z = result == 0;
@@ -316,13 +320,13 @@ pub fn execute(state: &mut SimState, inst: &Instruction) -> ExecResult {
 
         // -- Concatenation --
         Instruction::CnctBy { rd, doff, rs1, s1off, s1sz, rs2, s2off, s2sz, cd } => {
-            let v1 = extract_bits(state.read_reg(*rs1), (*s1off).wrapping_mul(8), (*s1sz).wrapping_mul(8));
-            let v2 = extract_bits(state.read_reg(*rs2), (*s2off).wrapping_mul(8), (*s2sz).wrapping_mul(8));
+            let v1 = extract_bits(state.read_reg(*rs1), (*s1off as u16) * 8, (*s1sz).wrapping_mul(8));
+            let v2 = extract_bits(state.read_reg(*rs2), (*s2off as u16) * 8, (*s2sz).wrapping_mul(8));
             let s2_bits = (*s2sz as u32) * 8;
             let combined = (v1 << s2_bits) | v2;
-            let total_sz = ((*s1sz as u8).wrapping_mul(8)).wrapping_add((*s2sz as u8).wrapping_mul(8));
+            let total_sz = ((*s1sz as u16) * 8 + (*s2sz as u16) * 8).min(128) as u8;
             maybe_clear(state, *rd, *cd);
-            let val = insert_bits(state.read_reg(*rd), (*doff).wrapping_mul(8), total_sz, combined);
+            let val = insert_bits(state.read_reg(*rd), (*doff as u16) * 8, total_sz, combined);
             state.write_reg(*rd, val);
             ExecResult::Success
         }
@@ -672,7 +676,7 @@ mod tests {
                 cd: false,
             },
         );
-        let val = extract_bits(state.read_reg(Reg::PR0), 0, 16);
+        let val = extract_bits(state.read_reg(Reg::PR0), 0u8, 16);
         assert_eq!(val, 0xABCD);
 
         // MOV: copy PR0[0..16] to PR1[0..16]
@@ -687,7 +691,7 @@ mod tests {
                 cd: false,
             },
         );
-        let val = extract_bits(state.read_reg(Reg::PR1), 0, 16);
+        let val = extract_bits(state.read_reg(Reg::PR1), 0u8, 16);
         assert_eq!(val, 0xABCD);
     }
 
@@ -801,7 +805,7 @@ mod tests {
                 cd: true,
             },
         );
-        let val = extract_bits(state.read_reg(Reg::PR0), 0, 8);
+        let val = extract_bits(state.read_reg(Reg::PR0), 0u8, 8);
         assert_eq!(val, 0x45, "Expected 0x45 from packet byte 0");
     }
 
@@ -850,7 +854,7 @@ mod tests {
         let r = step(&mut state).unwrap();
         assert!(!r.halted);
         assert_eq!(state.pc, 1);
-        let val = extract_bits(state.read_reg(Reg::PR0), 0, 16);
+        let val = extract_bits(state.read_reg(Reg::PR0), 0u8, 16);
         assert_eq!(val, 0x1234);
 
         // Step 2: HALT

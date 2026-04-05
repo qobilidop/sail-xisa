@@ -626,6 +626,86 @@ fn diff_multi_header_layers() {
 }
 
 // ---------------------------------------------------------------------------
+// MOV variant tests
+// ---------------------------------------------------------------------------
+
+#[test]
+fn diff_movl() {
+    // MOVL: dest_off = extract_bits(rs2, o2, sz2) + o1
+    diff_test_instrs(&[
+        Instruction::Movi { rd: Reg::PR0, doff: 0, imm: 0xAB, size: 8, cd: true },
+        Instruction::Movi { rd: Reg::PR1, doff: 0, imm: 4, size: 8, cd: true },  // dynamic offset = 4
+        Instruction::MovL {
+            rd: Reg::PR2, rs1: Reg::PR0, o1: 0, sz1: 8,
+            rs2: Reg::PR1, o2: 0, sz2: 8, cd: true,
+        },
+        Instruction::Halt { drop: false },
+    ], &[0u8; 256]);
+}
+
+#[test]
+fn diff_movli() {
+    // MOVLI: dest_off = imm + off
+    diff_test_instrs(&[
+        Instruction::Movi { rd: Reg::PR0, doff: 0, imm: 0xFF, size: 8, cd: true },
+        Instruction::MovLI {
+            rd: Reg::PR1, rs: Reg::PR0, off: 0, size: 8, imm: 8, cd: true,
+        },
+        Instruction::Halt { drop: false },
+    ], &[0u8; 256]);
+}
+
+#[test]
+fn diff_movlii() {
+    // MOVLII: dest_off = extract_bits(rs, off, size), insert imm at that offset
+    diff_test_instrs(&[
+        Instruction::Movi { rd: Reg::PR0, doff: 0, imm: 16, size: 8, cd: true },  // offset value = 16
+        Instruction::MovLII {
+            rd: Reg::PR1, rs: Reg::PR0, off: 0, size: 8, imm: 0xCD, isz: 8, cd: true,
+        },
+        Instruction::Halt { drop: false },
+    ], &[0u8; 256]);
+}
+
+#[test]
+fn diff_movr() {
+    // MOVR: dest_off = o1 - extract_bits(rs2, o2, sz2)
+    diff_test_instrs(&[
+        Instruction::Movi { rd: Reg::PR0, doff: 0, imm: 0xAB, size: 8, cd: true },
+        Instruction::Movi { rd: Reg::PR1, doff: 0, imm: 4, size: 8, cd: true },
+        Instruction::MovR {
+            rd: Reg::PR2, rs1: Reg::PR0, o1: 16, sz1: 8,
+            rs2: Reg::PR1, o2: 0, sz2: 8, cd: true,
+        },
+        Instruction::Halt { drop: false },
+    ], &[0u8; 256]);
+}
+
+#[test]
+fn diff_movri() {
+    // MOVRI: dest_off = off - imm
+    diff_test_instrs(&[
+        Instruction::Movi { rd: Reg::PR0, doff: 0, imm: 0xFF, size: 8, cd: true },
+        Instruction::MovRI {
+            rd: Reg::PR1, rs: Reg::PR0, off: 24, size: 8, imm: 8, cd: true,
+        },
+        Instruction::Halt { drop: false },
+    ], &[0u8; 256]);
+}
+
+#[test]
+fn diff_movrii() {
+    // MOVRII: extract offset from register, index into imm, insert at offset 0
+    diff_test_instrs(&[
+        Instruction::Movi { rd: Reg::PR0, doff: 0, imm: 2, size: 8, cd: true },  // reg_offset = 2
+        Instruction::MovRII {
+            rd: Reg::PR1, rs: Reg::PR0, off: 0, size: 8, imm: 0xFF, isz: 8, cd: true,
+        },
+        Instruction::Halt { drop: false },
+    ], &[0u8; 256]);
+}
+
+// ---------------------------------------------------------------------------
 // Proptest packet fuzzing
 // ---------------------------------------------------------------------------
 

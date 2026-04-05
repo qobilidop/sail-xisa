@@ -150,16 +150,10 @@ impl SimState {
 /// Extract `size` bits starting at bit position `offset` (0 = LSB).
 ///
 /// Returns the extracted value right-aligned (zero-extended).
-///
-/// # Panics
-///
-/// Panics in debug builds if `offset + size > 128`.
-pub fn extract_bits(val: u128, offset: u8, size: u8) -> u128 {
-    debug_assert!(
-        (offset as u16) + (size as u16) <= 128,
-        "extract_bits: offset({offset}) + size({size}) > 128"
-    );
-    if size == 0 {
+/// If `offset + size > 128`, returns 0 (matches Sail's unbounded nat semantics).
+pub fn extract_bits(val: u128, offset: impl Into<u16>, size: u8) -> u128 {
+    let offset = offset.into() as u32;
+    if size == 0 || offset + (size as u32) > 128 {
         return 0;
     }
     let mask = if size == 128 {
@@ -167,22 +161,16 @@ pub fn extract_bits(val: u128, offset: u8, size: u8) -> u128 {
     } else {
         (1u128 << size) - 1
     };
-    (val >> (offset as u32)) & mask
+    (val >> offset) & mask
 }
 
 /// Insert `size` bits of `data` at bit position `offset` (0 = LSB).
 ///
 /// Returns the modified value with all other bits preserved.
-///
-/// # Panics
-///
-/// Panics in debug builds if `offset + size > 128`.
-pub fn insert_bits(val: u128, offset: u8, size: u8, data: u128) -> u128 {
-    debug_assert!(
-        (offset as u16) + (size as u16) <= 128,
-        "insert_bits: offset({offset}) + size({size}) > 128"
-    );
-    if size == 0 {
+/// If `offset + size > 128`, returns `val` unchanged (matches Sail's unbounded nat semantics).
+pub fn insert_bits(val: u128, offset: impl Into<u16>, size: u8, data: u128) -> u128 {
+    let offset = offset.into() as u32;
+    if size == 0 || offset + (size as u32) > 128 {
         return val;
     }
     let mask: u128 = if size == 128 {
@@ -190,7 +178,7 @@ pub fn insert_bits(val: u128, offset: u8, size: u8, data: u128) -> u128 {
     } else {
         (1u128 << size) - 1
     };
-    (val & !(mask << (offset as u32))) | ((data & mask) << (offset as u32))
+    (val & !(mask << offset)) | ((data & mask) << offset)
 }
 
 /// Extract bits from a packet header buffer at a bit offset relative to cursor.
@@ -231,7 +219,7 @@ mod tests {
     fn test_extract_bits_lsb() {
         // Place 0xFF in the low byte (bits 0..8).
         let val: u128 = 0xFF;
-        let extracted = extract_bits(val, 0, 8);
+        let extracted = extract_bits(val, 0u8, 8);
         assert_eq!(extracted, 0xFF, "Expected 0xFF from low byte");
     }
 
@@ -239,14 +227,14 @@ mod tests {
     fn test_extract_bits_middle() {
         // Place 0xABCD in bits 8..24.
         let val: u128 = 0xABCDu128 << 8;
-        let extracted = extract_bits(val, 8, 16);
+        let extracted = extract_bits(val, 8u8, 16);
         assert_eq!(extracted, 0xABCD, "Expected 0xABCD from bits 8..24");
     }
 
     #[test]
     fn test_insert_bits() {
         let val: u128 = 0;
-        let result = insert_bits(val, 0, 8, 0xBE);
+        let result = insert_bits(val, 0u8, 8, 0xBE);
         // 0xBE should appear in the low byte.
         assert_eq!(result, 0xBEu128);
     }
@@ -255,7 +243,7 @@ mod tests {
     fn test_insert_preserves_other_bits() {
         // Start with all ones; insert 0 into bits 8..16.
         let val: u128 = u128::MAX;
-        let result = insert_bits(val, 8, 8, 0x00);
+        let result = insert_bits(val, 8u8, 8, 0x00);
         // Bit range 8..16 should be 0, rest 1.
         let expected = u128::MAX & !(0xFFu128 << 8);
         assert_eq!(result, expected, "Insert zeros should clear bits 8..16 only");
