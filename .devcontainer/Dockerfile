@@ -4,7 +4,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # System dependencies for Sail and its C backend
 RUN apt-get update && apt-get install -y \
-    opam gcc make cmake pkg-config \
+    opam clang lld make cmake pkg-config \
     libgmp-dev zlib1g-dev z3 \
     curl ca-certificates \
     && rm -rf /var/lib/apt/lists/*
@@ -29,6 +29,9 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
     && rustup target add wasm32-unknown-unknown
 
 ENV PATH="/root/.cargo/bin:${PATH}"
+
+# Use clang as the default C compiler
+ENV CC=clang
 
 # wasm-pack (builds Rust → WASM with JS bindings)
 RUN cargo install wasm-pack
